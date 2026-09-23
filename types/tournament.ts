@@ -1,0 +1,24 @@
+export type Tournament = {
+  id: string;
+  name: string;
+  organizer: string;
+  date: string;
+  city: string;
+  venue: string;
+  eventType: string;
+  gender: string;
+  level: string;
+  eligibility: string;
+  fee: string;
+  deadline: string;
+  applicationMethod: string;
+  officialUrl: string;
+  status: string;
+  notes: string;
+  eligibilityCategory: string;
+  membershipRequired: string;
+  externalAllowed: string;
+  otherCityAllowed: string;
+  ageCondition: string;
+  searchTokens: string;
+};
