@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Suspense } from "react";
 import { tournaments, getCities } from "@/lib/tournaments";
 import { SearchForm } from "@/components/SearchForm";
