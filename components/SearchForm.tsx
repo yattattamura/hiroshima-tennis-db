@@ -1,74 +1,95 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export function SearchForm({ cities }: { cities: string[] }) {
   const router = useRouter();
-  const params = useSearchParams();
 
   const submit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
     const form = new FormData(e.currentTarget);
     const qs = new URLSearchParams();
+
     for (const [key, value] of form.entries()) {
-      if (typeof value === "string" && value) qs.set(key, value);
+      if (typeof value === "string" && value) {
+        qs.set(key, value);
+      }
     }
+
     router.push(`/tournaments?${qs.toString()}`);
   };
 
   return (
     <form className="search-panel" onSubmit={submit}>
       <div className="section-title">大会を探す</div>
-      <p className="muted">条件を指定して、広島県内のテニス大会を検索できます。</p>
+
+      <p className="muted">
+        条件を指定して、広島県内のテニス大会を検索できます。
+      </p>
 
       <div className="field-grid">
         <label>
           <span>開催時期</span>
-          <select name="period" defaultValue={params.get("period") ?? "all"}>
+          <select name="period" defaultValue="all">
             <option value="all">すべて</option>
             <option value="month">今月</option>
             <option value="3months">3か月以内</option>
           </select>
         </label>
+
         <label>
           <span>市町村</span>
-          <select name="city" defaultValue={params.get("city") ?? ""}>
+          <select name="city" defaultValue="">
             <option value="">すべて</option>
-            {cities.map((c) => <option key={c}>{c}</option>)}
+            {cities.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
           </select>
         </label>
+
         <label>
           <span>種目</span>
-          <select name="eventType" defaultValue={params.get("eventType") ?? ""}>
+          <select name="eventType" defaultValue="">
             <option value="">すべて</option>
-            <option>シングルス</option>
-            <option>ダブルス</option>
-            <option>MIXダブルス</option>
-            <option>団体戦</option>
-            <option>交流大会</option>
-            <option>ベテラン</option>
+            <option value="シングルス">シングルス</option>
+            <option value="ダブルス">ダブルス</option>
+            <option value="MIXダブルス">MIXダブルス</option>
+            <option value="団体戦">団体戦</option>
+            <option value="交流大会">交流大会</option>
+            <option value="ベテラン">ベテラン</option>
           </select>
         </label>
+
         <label>
           <span>性別</span>
-          <select name="gender" defaultValue={params.get("gender") ?? ""}>
+          <select name="gender" defaultValue="">
             <option value="">指定なし</option>
-            <option>男子</option>
-            <option>女子</option>
-            <option>男女</option>
+            <option value="男子">男子</option>
+            <option value="女子">女子</option>
+            <option value="男女">男女</option>
           </select>
         </label>
+
         <label>
           <span>レベル</span>
-          <select name="level" defaultValue={params.get("level") ?? ""}>
+          <select name="level" defaultValue="">
             <option value="">すべて</option>
-            <option>A</option><option>B</option><option>C</option><option>D</option>
-            <option>AB</option><option>CD</option><option>オープン</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
+            <option value="AB">AB</option>
+            <option value="CD">CD</option>
+            <option value="オープン">オープン</option>
           </select>
         </label>
+
         <label>
           <span>参加資格</span>
-          <select name="eligibility" defaultValue={params.get("eligibility") ?? ""}>
+          <select name="eligibility" defaultValue="">
             <option value="">すべて</option>
             <option value="external">非会員でも参加OK</option>
             <option value="otherCity">他市協会員OK</option>
@@ -77,7 +98,9 @@ export function SearchForm({ cities }: { cities: string[] }) {
         </label>
       </div>
 
-      <button className="primary search-button" type="submit">🔎 この条件で検索</button>
+      <button className="primary search-button" type="submit">
+        🔎 この条件で検索
+      </button>
     </form>
   );
 }

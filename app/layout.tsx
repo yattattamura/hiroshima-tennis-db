@@ -2,8 +2,8 @@ import "./globals.css";
 import { Header } from "@/components/Header";
 
 export const metadata = {
-  title: "広島テニスDB",
-  description: "広島県のテニス大会を横断検索できるデータベース",
+  title: "広島テニスポータルサイト",
+  description: "広島県のテニス大会を横断検索できるポータルサイト",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -12,7 +12,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <Header />
         <main>{children}</main>
-        <footer className="site-footer">広島テニスDB MVP</footer>
+        <footer className="site-footer">広島テニスポータルサイト</footer>
       </body>
     </html>
   );
