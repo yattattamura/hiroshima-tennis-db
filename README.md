@@ -22,8 +22,6 @@ npm install
 npm run dev
 ```
 
-ブラウザで http://localhost:3000 を開いてください。
-
 ## 現段階の位置づけ
 
 この版は「画面＋検索体験」を先に固めるためのMVPです。
@@ -47,7 +45,8 @@ app/
   tournaments/[id]/suggest/page.tsx
   admin/page.tsx
 components/
-lib/
 data/
+doc/
+lib/
 types/
 ```
