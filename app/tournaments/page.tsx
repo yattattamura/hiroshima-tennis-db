@@ -28,15 +28,15 @@ function getJapanToday(): string {
 
   const year = parts.find(
     (part) => part.type === "year"
-  )?.value;
+  )?.value ?? "";
 
   const month = parts.find(
     (part) => part.type === "month"
-  )?.value;
+  )?.value ?? "";
 
   const day = parts.find(
     (part) => part.type === "day"
-  )?.value;
+  )?.value ?? "";
 
   return `${year}-${month}-${day}`;
 }
@@ -83,7 +83,13 @@ function addMonths(
     .split("T")[0];
 }
 
-function convertTournament(row: any): Tournament {
+function clean(value?: string): string {
+  return value?.trim() ?? "";
+}
+
+function convertTournament(
+  row: any
+): Tournament {
   return {
     id: row.id,
     name: row.name,
@@ -117,7 +123,7 @@ function convertTournament(row: any): Tournament {
   };
 }
 
-function getPeriodLabel(
+function periodLabel(
   period: string
 ): string {
   switch (period) {
@@ -135,7 +141,7 @@ function getPeriodLabel(
   }
 }
 
-function getDeadlineLabel(
+function deadlineLabel(
   deadline: string
 ): string {
   switch (deadline) {
@@ -156,21 +162,6 @@ function getDeadlineLabel(
   }
 }
 
-function getStatusLabel(
-  status: string
-): string {
-  return status || "指定なし";
-}
-
-function sanitizeKeyword(
-  value: string
-): string {
-  return value
-    .replace(/[%_]/g, "")
-    .replace(/[\\(),]/g, " ")
-    .trim();
-}
-
 export default async function TournamentsPage({
   searchParams,
 }: {
@@ -178,23 +169,23 @@ export default async function TournamentsPage({
 }) {
   const params = await searchParams;
 
-  const period = params.period ?? "all";
-  const city = params.city?.trim() ?? "";
-  const eventType =
-    params.eventType?.trim() ?? "";
-  const gender =
-    params.gender?.trim() ?? "";
-  const level =
-    params.level?.trim() ?? "";
-  const eligibility =
-    params.eligibility?.trim() ?? "";
-  const keyword = sanitizeKeyword(
-    params.keyword ?? ""
+  const period = clean(params.period) || "all";
+  const city = clean(params.city);
+  const eventType = clean(
+    params.eventType
   );
-  const deadline =
-    params.deadline?.trim() ?? "";
-  const status =
-    params.status?.trim() ?? "";
+  const gender = clean(params.gender);
+  const level = clean(params.level);
+  const eligibility = clean(
+    params.eligibility
+  );
+  const keyword = clean(
+    params.keyword
+  );
+  const deadline = clean(
+    params.deadline
+  );
+  const status = clean(params.status);
 
   const supabase = await createClient();
 
@@ -211,35 +202,36 @@ export default async function TournamentsPage({
       ascending: true,
     });
 
-  // ----------------------------------------
-  // キーワード
-  // ----------------------------------------
-
+  // キーワード検索
   if (keyword) {
-    query = query.or(
-      [
-        `name.ilike.%${keyword}%`,
-        `organizer_name_raw.ilike.%${keyword}%`,
-        `venue_name_raw.ilike.%${keyword}%`,
-        `city.ilike.%${keyword}%`,
-        `search_tokens.ilike.%${keyword}%`,
-        `notes.ilike.%${keyword}%`,
-      ].join(",")
+    const safeKeyword = keyword
+      .replace(/[%_]/g, "")
+      .replace(/[\\(),]/g, " ")
+      .trim();
+
+    if (safeKeyword) {
+      query = query.or(
+        [
+          `name.ilike.%${safeKeyword}%`,
+          `organizer_name_raw.ilike.%${safeKeyword}%`,
+          `venue_name_raw.ilike.%${safeKeyword}%`,
+          `city.ilike.%${safeKeyword}%`,
+          `search_tokens.ilike.%${safeKeyword}%`,
+          `notes.ilike.%${safeKeyword}%`,
+        ].join(",")
+      );
+    }
+  }
+
+  // 市町村
+  if (city) {
+    query = query.eq(
+      "city",
+      city
     );
   }
 
-  // ----------------------------------------
-  // 市町村
-  // ----------------------------------------
-
-  if (city) {
-    query = query.eq("city", city);
-  }
-
-  // ----------------------------------------
   // 種目
-  // ----------------------------------------
-
   if (eventType) {
     query = query.ilike(
       "event_type",
@@ -247,10 +239,7 @@ export default async function TournamentsPage({
     );
   }
 
-  // ----------------------------------------
   // 性別
-  // ----------------------------------------
-
   if (gender) {
     query = query.ilike(
       "gender",
@@ -258,31 +247,23 @@ export default async function TournamentsPage({
     );
   }
 
-  // ----------------------------------------
   // レベル
-  // ----------------------------------------
-
-  if (level) {
-    if (level === "CD") {
-      query = query.or(
-        "level.eq.CD,level.eq.C/D"
-      );
-    } else if (level === "AB") {
-      query = query.or(
-        "level.eq.AB,level.eq.A/B"
-      );
-    } else {
-      query = query.eq(
-        "level",
-        level
-      );
-    }
+  if (level === "CD") {
+    query = query.or(
+      "level.eq.CD,level.eq.C/D"
+    );
+  } else if (level === "AB") {
+    query = query.or(
+      "level.eq.AB,level.eq.A/B"
+    );
+  } else if (level) {
+    query = query.eq(
+      "level",
+      level
+    );
   }
 
-  // ----------------------------------------
   // 参加資格
-  // ----------------------------------------
-
   if (eligibility === "external") {
     query = query.eq(
       "external_allowed",
@@ -304,10 +285,7 @@ export default async function TournamentsPage({
     );
   }
 
-  // ----------------------------------------
-  // 大会ステータス
-  // ----------------------------------------
-
+  // ステータス
   if (status) {
     query = query.eq(
       "status",
@@ -315,10 +293,7 @@ export default async function TournamentsPage({
     );
   }
 
-  // ----------------------------------------
   // 開催時期
-  // ----------------------------------------
-
   if (period === "month") {
     const nextMonth = addMonths(
       today,
@@ -357,10 +332,7 @@ export default async function TournamentsPage({
       );
   }
 
-  // ----------------------------------------
   // 申込締切
-  // ----------------------------------------
-
   if (deadline === "open") {
     query = query.gte(
       "deadline_date",
@@ -405,18 +377,10 @@ export default async function TournamentsPage({
     );
   }
 
-  // ----------------------------------------
-  // Supabase実行
-  // ----------------------------------------
-
   const {
     data,
     error,
   } = await query;
-
-  // ----------------------------------------
-  // エラー
-  // ----------------------------------------
 
   if (error) {
     return (
@@ -464,103 +428,85 @@ export default async function TournamentsPage({
       convertTournament
     );
 
-  // ----------------------------------------
-  // 検索条件表示
-  // ----------------------------------------
-
-  const activeConditions: string[] = [];
+  const conditions: string[] = [];
 
   if (keyword) {
-    activeConditions.push(
+    conditions.push(
       `キーワード: ${keyword}`
     );
   }
 
   if (period !== "all") {
-    activeConditions.push(
-      `開催時期: ${getPeriodLabel(
-        period
-      )}`
+    conditions.push(
+      `開催時期: ${periodLabel(period)}`
     );
   }
 
   if (city) {
-    activeConditions.push(
+    conditions.push(
       `市町村: ${city}`
     );
   }
 
   if (eventType) {
-    activeConditions.push(
+    conditions.push(
       `種目: ${eventType}`
     );
   }
 
   if (gender) {
-    activeConditions.push(
+    conditions.push(
       `性別: ${gender}`
     );
   }
 
   if (level) {
-    activeConditions.push(
+    conditions.push(
       `レベル: ${level}`
     );
   }
 
   if (eligibility === "external") {
-    activeConditions.push(
+    conditions.push(
       "参加資格: 非会員でも参加OK"
     );
   }
 
   if (eligibility === "otherCity") {
-    activeConditions.push(
+    conditions.push(
       "参加資格: 他市協会員OK"
     );
   }
 
   if (eligibility === "visitor") {
-    activeConditions.push(
+    conditions.push(
       "参加資格: ビジターOK"
     );
   }
 
   if (deadline) {
-    activeConditions.push(
-      `申込締切: ${getDeadlineLabel(
+    conditions.push(
+      `申込締切: ${deadlineLabel(
         deadline
       )}`
     );
   }
 
   if (status) {
-    activeConditions.push(
-      `ステータス: ${getStatusLabel(
-        status
-      )}`
+    conditions.push(
+      `ステータス: ${status}`
     );
   }
-
-  const hasFilters =
-    activeConditions.length > 0;
-
-  // ----------------------------------------
-  // 表示
-  // ----------------------------------------
 
   return (
     <div className="search-page">
       <div className="container">
 
-        {/* パンくず */}
         <div className="breadcrumb">
           <Link href="/">
             ホーム
           </Link>
-
           {" → "}
-
           <span>
             大会を探す
           </span>
@@ -573,10 +519,6 @@ export default async function TournamentsPage({
           }}
         >
 
-          {/* -------------------------------- */}
-          {/* 左側 */}
-          {/* -------------------------------- */}
-
           <aside className="filters">
 
             <div
@@ -586,17 +528,11 @@ export default async function TournamentsPage({
               }}
             >
               <strong>
-                大会を探す
+                大会一覧
               </strong>
 
-              <p
-                className="muted"
-                style={{
-                  marginTop: 10,
-                }}
-              >
-                {tournaments.length}
-                件の大会が見つかりました
+              <p className="muted">
+                {tournaments.length}件の大会が見つかりました
               </p>
 
               <Link
@@ -618,7 +554,7 @@ export default async function TournamentsPage({
                 検索条件
               </strong>
 
-              {hasFilters ? (
+              {conditions.length > 0 ? (
                 <div
                   style={{
                     display: "grid",
@@ -626,7 +562,7 @@ export default async function TournamentsPage({
                     marginTop: 14,
                   }}
                 >
-                  {activeConditions.map(
+                  {conditions.map(
                     (condition) => (
                       <div
                         key={condition}
@@ -657,15 +593,11 @@ export default async function TournamentsPage({
                     marginTop: 14,
                   }}
                 >
-                  条件を指定せず、登録されている大会を表示しています。
+                  すべての大会を表示しています。
                 </p>
               )}
             </div>
           </aside>
-
-          {/* -------------------------------- */}
-          {/* 右側 */}
-          {/* -------------------------------- */}
 
           <section className="results">
 
@@ -707,8 +639,6 @@ export default async function TournamentsPage({
               </Link>
             </div>
 
-            {/* 大会一覧 */}
-
             {tournaments.map(
               (tournament) => (
                 <TournamentCard
@@ -717,8 +647,6 @@ export default async function TournamentsPage({
                 />
               )
             )}
-
-            {/* 0件 */}
 
             {tournaments.length === 0 && (
               <div
@@ -744,7 +672,7 @@ export default async function TournamentsPage({
                     href="/"
                     className="outline-button"
                   >
-                    検索条件を変更
+                    条件をクリア
                   </Link>
                 </div>
               </div>

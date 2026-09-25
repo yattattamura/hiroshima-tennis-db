@@ -3,7 +3,32 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { TournamentCard } from "@/components/TournamentCard";
 import { SearchForm } from "@/components/SearchForm";
-import { Tournament } from "@/types/tournament";
+
+type Tournament = {
+  id: string;
+  name: string;
+  organizer_name_raw: string | null;
+  city: string | null;
+  venue_name_raw: string | null;
+  date_text: string | null;
+  start_date: string | null;
+  event_type: string | null;
+  gender: string | null;
+  level: string | null;
+  eligibility: string | null;
+  fee_text: string | null;
+  deadline_text: string | null;
+  application_method: string | null;
+  official_url: string | null;
+  status: string | null;
+  notes: string | null;
+  eligibility_category: string | null;
+  membership_required: string | null;
+  external_allowed: string | null;
+  other_city_allowed: string | null;
+  age_condition: string | null;
+  search_tokens: string | null;
+};
 
 function getJapanToday(): string {
   const parts = new Intl.DateTimeFormat("en-US", {
@@ -13,14 +38,24 @@ function getJapanToday(): string {
     day: "2-digit",
   }).formatToParts(new Date());
 
-  const year = parts.find((part) => part.type === "year")?.value;
-  const month = parts.find((part) => part.type === "month")?.value;
-  const day = parts.find((part) => part.type === "day")?.value;
+  const year = parts.find(
+    (part) => part.type === "year"
+  )?.value;
+
+  const month = parts.find(
+    (part) => part.type === "month"
+  )?.value;
+
+  const day = parts.find(
+    (part) => part.type === "day"
+  )?.value;
 
   return `${year}-${month}-${day}`;
 }
 
-function convertTournament(row: any): Tournament {
+function convertTournament(
+  row: Tournament
+) {
   return {
     id: row.id,
     name: row.name,
@@ -34,16 +69,23 @@ function convertTournament(row: any): Tournament {
     eligibility: row.eligibility ?? "",
     fee: row.fee_text ?? "",
     deadline: row.deadline_text ?? "",
-    applicationMethod: row.application_method ?? "",
+    applicationMethod:
+      row.application_method ?? "",
     officialUrl: row.official_url ?? "",
     status: row.status ?? "",
     notes: row.notes ?? "",
-    eligibilityCategory: row.eligibility_category ?? "",
-    membershipRequired: row.membership_required ?? "",
-    externalAllowed: row.external_allowed ?? "",
-    otherCityAllowed: row.other_city_allowed ?? "",
-    ageCondition: row.age_condition ?? "",
-    searchTokens: row.search_tokens ?? "",
+    eligibilityCategory:
+      row.eligibility_category ?? "",
+    membershipRequired:
+      row.membership_required ?? "",
+    externalAllowed:
+      row.external_allowed ?? "",
+    otherCityAllowed:
+      row.other_city_allowed ?? "",
+    ageCondition:
+      row.age_condition ?? "",
+    searchTokens:
+      row.search_tokens ?? "",
   };
 }
 
@@ -64,6 +106,7 @@ export default async function Home() {
       .gte("start_date", today)
       .order("start_date", {
         ascending: true,
+        nullsFirst: false,
       })
       .limit(3),
 
@@ -126,7 +169,7 @@ export default async function Home() {
     );
   }
 
-  const tournaments: Tournament[] = (
+  const featured = (
     featuredResult.data ?? []
   ).map(convertTournament);
 
@@ -220,9 +263,9 @@ export default async function Home() {
           </Link>
         </div>
 
-        {tournaments.length > 0 ? (
+        {featured.length > 0 ? (
           <div className="grid3">
-            {tournaments.map((tournament) => (
+            {featured.map((tournament) => (
               <TournamentCard
                 key={tournament.id}
                 tournament={tournament}
@@ -245,7 +288,11 @@ export default async function Home() {
               大会情報は順次追加していきます。
             </p>
 
-            <div style={{ marginTop: 18 }}>
+            <div
+              style={{
+                marginTop: 18,
+              }}
+            >
               <Link
                 href="/tournaments"
                 className="outline-button"
