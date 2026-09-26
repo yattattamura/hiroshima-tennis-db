@@ -34,6 +34,18 @@ export default async function sitemap(): Promise<
       changeFrequency: "daily",
       priority: 0.9,
     },
+
+    {
+      url: `${SITE_URL}/areas`,
+      changeFrequency: "weekly",
+      priority: 0.7,
+    },
+
+    {
+      url: `${SITE_URL}/organizers`,
+      changeFrequency: "weekly",
+      priority: 0.7,
+    },
   ];
 
   for (
