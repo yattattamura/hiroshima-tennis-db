@@ -97,6 +97,7 @@ export default async function Home() {
     citiesResult,
     tournamentCountResult,
     organizerCountResult,
+    organizersResult,
   ] = await Promise.all([
     supabase
       .from("tournaments")
@@ -124,20 +125,28 @@ export default async function Home() {
         count: "exact",
         head: true,
       }),
+    supabase
+      .from("organizers")
+      .select("id, name")
+      .order("name", {
+        ascending: true,
+      }),
   ]);
 
   if (
     featuredResult.error ||
     citiesResult.error ||
     tournamentCountResult.error ||
-    organizerCountResult.error
+    organizerCountResult.error ||
+    organizersResult.error
   ) {
     const errorMessage =
       featuredResult.error?.message ??
       citiesResult.error?.message ??
       tournamentCountResult.error?.message ??
       organizerCountResult.error?.message ??
-      "データの取得に失敗しました。";
+      organizersResult.error?.message ??
+      "データの取得に失敗しました.";
 
     return (
       <div className="detail-page">
@@ -184,6 +193,12 @@ export default async function Home() {
   const organizerCount =
     organizerCountResult.count ?? 0;
 
+  const organizers =
+    (organizersResult.data ?? []) as {
+      id: string;
+      name: string;
+    }[];
+
   return (
     <>
       <section className="hero home-hero">
@@ -227,6 +242,98 @@ export default async function Home() {
             </Link>
           </div>
         )}
+      </section>
+
+      <section
+        className="section container"
+        style={{ paddingBottom: 18 }}
+        aria-labelledby="coverage-heading"
+      >
+        <div className="section-heading">
+          <div>
+            <h2 id="coverage-heading">掲載エリア・主催者</h2>
+            <p className="muted">
+              広島県内の一般・社会人向け大会を掲載しています。
+            </p>
+          </div>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns:
+              "repeat(auto-fit, minmax(260px, 1fr))",
+            gap: 16,
+          }}
+        >
+          <div className="card" style={{ padding: 22 }}>
+            <h3 style={{ marginTop: 0 }}>
+              📍 掲載エリア
+            </h3>
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 7,
+                marginTop: 12,
+              }}
+            >
+              {cities.slice(0, 10).map((city) => (
+                <Link
+                  key={city}
+                  href={`/tournaments?city=${encodeURIComponent(city)}`}
+                  className="badge"
+                  style={{ textDecoration: "none" }}
+                >
+                  {city}
+                </Link>
+              ))}
+            </div>
+            <Link
+              href="/areas"
+              className="section-link"
+              style={{
+                display: "inline-block",
+                marginTop: 14,
+              }}
+            >
+              すべてのエリアを見る →
+            </Link>
+          </div>
+
+          <div className="card" style={{ padding: 22 }}>
+            <h3 style={{ marginTop: 0 }}>
+              🏢 掲載主催者
+            </h3>
+            <div
+              style={{
+                display: "grid",
+                gap: 5,
+                marginTop: 12,
+              }}
+            >
+              {organizers.slice(0, 8).map((organizer) => (
+                <Link
+                  key={organizer.id}
+                  href={`/organizers/${organizer.id}`}
+                  className="text-link"
+                >
+                  {organizer.name}
+                </Link>
+              ))}
+            </div>
+            <Link
+              href="/organizers"
+              className="section-link"
+              style={{
+                display: "inline-block",
+                marginTop: 14,
+              }}
+            >
+              すべての主催者を見る →
+            </Link>
+          </div>
+        </div>
       </section>
 
       <section className="container home-stats" aria-label="サイト情報">
