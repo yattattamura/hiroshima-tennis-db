@@ -62,8 +62,17 @@ export function TournamentCard({
         <h3>{tournament.name}</h3>
 
         <p className="muted tournament-location-v6">
-          📍 {tournament.city}
+          📍 {tournament.city || "エリア未設定"}
           {tournament.venue ? `・${tournament.venue}` : ""}
+        </p>
+
+        <p
+          className="muted"
+          style={{
+            margin: "5px 0 0",
+          }}
+        >
+          主催：{tournament.organizer || "未設定"}
         </p>
 
         <div className="mini-tags tournament-mini-tags-v6">
