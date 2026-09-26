@@ -11,6 +11,7 @@ export type Tournament = {
   eligibility: string;
   fee: string;
   deadline: string;
+  deadlineDate?: string;
   applicationMethod: string;
   officialUrl: string;
   status: string;
