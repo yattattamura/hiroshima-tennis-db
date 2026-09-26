@@ -127,7 +127,7 @@ export default async function AdminPage() {
                 className="muted"
                 style={{ margin: 0 }}
               >
-                広島テニスDBのデータ管理画面です。
+                広島テニスポータルのデータ管理画面です。
               </p>
             </div>
 
