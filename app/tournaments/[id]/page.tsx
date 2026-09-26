@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
+import { FavoriteButton } from "@/components/FavoriteButton";
 
 type Source = {
   id: string;
@@ -110,7 +111,10 @@ export default async function TournamentDetail({
             </span>
           </div>
 
-          <h1>{tournament.name}</h1>
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, flexWrap: "wrap", marginBottom: 20 }}>
+            <h1 style={{ marginBottom: 0 }}>{tournament.name}</h1>
+            <FavoriteButton tournamentId={tournament.id} />
+          </div>
 
           <div className="detail-keyinfo">
             <div className="detail-keyitem">
