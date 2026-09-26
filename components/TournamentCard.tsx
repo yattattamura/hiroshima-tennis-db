@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FavoriteButton } from "@/components/FavoriteButton";
 import { Tournament } from "@/types/tournament";
 
 function getShortDate(dateText: string) {
@@ -108,59 +109,67 @@ export function TournamentCard({
   ].filter(Boolean);
 
   return (
-    <Link
-      className="card tournament-card tournament-card-v6 tournament-card-link"
-      href={"/tournaments/" + tournament.id}
-      aria-label={tournament.name + "の詳細を見る"}
-    >
-      <div
-        className="date-box date-box-v6"
-        aria-label={"開催日 " + tournament.date}
+    <article className="card tournament-card tournament-card-v6">
+      <Link
+        className="tournament-card-content-link"
+        href={"/tournaments/" + tournament.id}
+        aria-label={tournament.name + "の詳細を見る"}
       >
-        <strong>{shortDate.monthDay}</strong>
-        {shortDate.weekday && <span>{shortDate.weekday}</span>}
-      </div>
-
-      <div className="card-main tournament-card-main-v6">
-        <div className="badges tournament-badges-v6">
-          {tournament.status && (
-            <span className="badge green">{tournament.status}</span>
-          )}
-          {tournament.level && <span className="badge">{tournament.level}</span>}
-          {tournament.eventType && (
-            <span className="badge">{tournament.eventType}</span>
-          )}
+        <div
+          className="date-box date-box-v6"
+          aria-label={"開催日 " + tournament.date}
+        >
+          <strong>{shortDate.monthDay}</strong>
+          {shortDate.weekday && <span>{shortDate.weekday}</span>}
         </div>
 
-        <h3>{tournament.name}</h3>
+        <div className="card-main tournament-card-main-v6">
+          <div className="badges tournament-badges-v6">
+            {tournament.status && (
+              <span className="badge green">{tournament.status}</span>
+            )}
+            {tournament.level && <span className="badge">{tournament.level}</span>}
+            {tournament.eventType && (
+              <span className="badge">{tournament.eventType}</span>
+            )}
+          </div>
 
-        <p className="muted tournament-location-v6">
-          📍 {tournament.city || "エリア未設定"}
-          {tournament.venue ? "・" + tournament.venue : ""}
-        </p>
+          <h3>{tournament.name}</h3>
 
-        <p className="muted tournament-organizer">
-          主催：{tournament.organizer || "未設定"}
-        </p>
+          <p className="muted tournament-location-v6">
+            📍 {tournament.city || "エリア未設定"}
+            {tournament.venue ? "・" + tournament.venue : ""}
+          </p>
 
-        <div className="mini-tags tournament-mini-tags-v6">
-          {eligibilityTags.map((tag) => (
-            <span key={tag}>{tag}</span>
-          ))}
+          <p className="muted tournament-organizer">
+            主催：{tournament.organizer || "未設定"}
+          </p>
 
-          {deadlineInfo.label ? (
-            <span className={"deadline-pill deadline-" + deadlineInfo.tone}>
-              {deadlineInfo.label}
-            </span>
-          ) : fallbackDeadline ? (
-            <span>{fallbackDeadline}</span>
-          ) : null}
+          <div className="mini-tags tournament-mini-tags-v6">
+            {eligibilityTags.map((tag) => (
+              <span key={tag}>{tag}</span>
+            ))}
+
+            {deadlineInfo.label ? (
+              <span className={"deadline-pill deadline-" + deadlineInfo.tone}>
+                {deadlineInfo.label}
+              </span>
+            ) : fallbackDeadline ? (
+              <span>{fallbackDeadline}</span>
+            ) : null}
+          </div>
         </div>
-      </div>
+      </Link>
 
-      <span className="outline-button tournament-detail-link-v6" aria-hidden="true">
-        詳細 →
-      </span>
-    </Link>
+      <div className="tournament-card-actions">
+        <FavoriteButton tournamentId={tournament.id} compact />
+        <Link
+          className="outline-button tournament-detail-link-v6"
+          href={"/tournaments/" + tournament.id}
+        >
+          詳細 →
+        </Link>
+      </div>
+    </article>
   );
 }
