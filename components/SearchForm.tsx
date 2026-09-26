@@ -3,6 +3,13 @@
 import { FormEvent } from "react";
 import { useRouter } from "next/navigation";
 
+const QUICK_FILTERS = [
+  { key: "period", icon: "📅", label: "日程" },
+  { key: "city", icon: "📍", label: "エリア" },
+  { key: "eventType", icon: "🎾", label: "種目" },
+  { key: "level", icon: "⭐", label: "レベル" },
+] as const;
+
 export function SearchForm({
   cities,
 }: {
@@ -43,7 +50,7 @@ export function SearchForm({
       onSubmit={submit}
     >
       <div className="search-panel-title">
-        大会を検索
+        大会を探す
       </div>
 
       <div className="search-primary-grid">
@@ -53,15 +60,18 @@ export function SearchForm({
             type="search"
             name="keyword"
             placeholder="大会名・会場・主催者"
+            autoComplete="off"
           />
         </label>
 
-        <label>
-          <span>日程</span>
-          <select
-            name="period"
-            defaultValue="all"
-          >
+        <label className="quick-filter">
+          <span className="quick-filter-top">
+            <span className="quick-filter-icon" aria-hidden="true">
+              📅
+            </span>
+            <span className="quick-filter-label">日程</span>
+          </span>
+          <select name="period" defaultValue="all" aria-label="日程">
             <option value="all">すべて</option>
             <option value="month">今月</option>
             <option value="3months">3か月以内</option>
@@ -69,9 +79,14 @@ export function SearchForm({
           </select>
         </label>
 
-        <label>
-          <span>エリア</span>
-          <select name="city" defaultValue="">
+        <label className="quick-filter">
+          <span className="quick-filter-top">
+            <span className="quick-filter-icon" aria-hidden="true">
+              📍
+            </span>
+            <span className="quick-filter-label">エリア</span>
+          </span>
+          <select name="city" defaultValue="" aria-label="エリア">
             <option value="">すべて</option>
             {cities.map((city) => (
               <option key={city} value={city}>
@@ -81,11 +96,17 @@ export function SearchForm({
           </select>
         </label>
 
-        <label>
-          <span>種目</span>
+        <label className="quick-filter">
+          <span className="quick-filter-top">
+            <span className="quick-filter-icon" aria-hidden="true">
+              🎾
+            </span>
+            <span className="quick-filter-label">種目</span>
+          </span>
           <select
             name="eventType"
             defaultValue=""
+            aria-label="種目"
           >
             <option value="">すべて</option>
             <option value="シングルス">シングルス</option>
@@ -97,9 +118,14 @@ export function SearchForm({
           </select>
         </label>
 
-        <label>
-          <span>レベル</span>
-          <select name="level" defaultValue="">
+        <label className="quick-filter">
+          <span className="quick-filter-top">
+            <span className="quick-filter-icon" aria-hidden="true">
+              ⭐
+            </span>
+            <span className="quick-filter-label">レベル</span>
+          </span>
+          <select name="level" defaultValue="" aria-label="レベル">
             <option value="">すべて</option>
             <option value="A">A</option>
             <option value="B">B</option>
@@ -113,7 +139,7 @@ export function SearchForm({
       </div>
 
       <details className="advanced-filters">
-        <summary>＋ 詳細条件</summary>
+        <summary>詳細条件</summary>
 
         <div className="advanced-filter-grid">
           <label>
@@ -166,7 +192,7 @@ export function SearchForm({
         className="primary search-button"
         type="submit"
       >
-        🔎 大会を検索
+        🔎 検索する
       </button>
     </form>
   );

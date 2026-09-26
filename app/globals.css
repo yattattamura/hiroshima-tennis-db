@@ -192,15 +192,38 @@ nav a:hover,
 }
 
 .search-panel-title {
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 800;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
 .search-primary-grid {
   display: grid;
-  grid-template-columns: 1.7fr 1fr 1fr 1fr 1fr;
-  gap: 10px;
+  grid-template-columns: 1.6fr repeat(4, 1fr);
+  gap: 9px;
+}
+
+.quick-filter {
+  min-width: 0;
+}
+
+.quick-filter-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 18px;
+  margin-bottom: 4px;
+}
+
+.quick-filter-icon {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.quick-filter-label {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .search-keyword-field {
@@ -251,6 +274,22 @@ textarea:focus {
   font-size: 13px;
   font-weight: 700;
   user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.advanced-filters summary::after {
+  content: "›";
+  font-size: 18px;
+  line-height: 1;
+  transform: rotate(90deg);
+  transition: transform 0.15s ease;
+}
+
+.advanced-filters[open] summary::after {
+  transform: rotate(-90deg);
 }
 
 .advanced-filters summary::-webkit-details-marker {
@@ -266,10 +305,10 @@ textarea:focus {
 
 .search-button {
   display: block;
-  width: 100%;
-  margin: 14px 0 0;
-  min-height: 44px;
-  font-size: 15px;
+  width: min(300px, 100%);
+  margin: 12px auto 0;
+  min-height: 42px;
+  font-size: 14px;
 }
 
 .stats {
@@ -689,18 +728,30 @@ textarea:focus {
   }
 
   .search-panel {
-    padding: 14px;
+    padding: 12px;
     border-radius: 11px;
   }
 
   .search-panel-title {
-    font-size: 16px;
-    margin-bottom: 10px;
+    font-size: 15px;
+    margin-bottom: 9px;
   }
 
   .search-primary-grid {
     grid-template-columns: 1fr 1fr;
     gap: 8px;
+  }
+
+  .quick-filter-top {
+    margin-bottom: 3px;
+  }
+
+  .quick-filter-label {
+    font-size: 11px;
+  }
+
+  .quick-filter-icon {
+    font-size: 12px;
   }
 
   .search-keyword-field {
@@ -731,8 +782,9 @@ textarea:focus {
   }
 
   .search-button {
-    margin-top: 10px;
-    min-height: 44px;
+    width: 100%;
+    margin-top: 9px;
+    min-height: 42px;
     font-size: 14px;
   }
 
