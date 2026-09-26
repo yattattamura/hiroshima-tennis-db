@@ -1,6 +1,19 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export function Header() {
+  const pathname = usePathname();
+
+  const isActive = (href: string) => {
+    if (href === "/") {
+      return pathname === "/";
+    }
+
+    return pathname === href || pathname.startsWith(href + "/");
+  };
+
   return (
     <>
       <header className="header">
@@ -10,16 +23,27 @@ export function Header() {
               🎾 広島テニスポータル
             </Link>
 
-            <div className="header-actions">
-              <button className="link-button">ログイン</button>
-              <button className="primary small">会員登録</button>
-            </div>
           </div>
 
           <nav className="header-nav">
-            <Link href="/tournaments">大会を探す</Link>
-            <Link href="/favorites">お気に入り</Link>
-            <Link href="/recent">最近見た</Link>
+            <Link
+              href="/tournaments"
+              className={isActive("/tournaments") ? "active" : undefined}
+            >
+              大会を探す
+            </Link>
+            <Link
+              href="/favorites"
+              className={isActive("/favorites") ? "active" : undefined}
+            >
+              お気に入り
+            </Link>
+            <Link
+              href="/recent"
+              className={isActive("/recent") ? "active" : undefined}
+            >
+              最近見た
+            </Link>
           </nav>
         </div>
       </header>
@@ -28,19 +52,19 @@ export function Header() {
         className="mobile-bottom-nav"
         aria-label="スマホ用ナビゲーション"
       >
-        <Link href="/" className="mobile-bottom-nav-item">
+        <Link href="/" className={"mobile-bottom-nav-item" + (isActive("/") ? " active" : "")}>
           <span aria-hidden="true">🏠</span>
           <span>ホーム</span>
         </Link>
-        <Link href="/tournaments" className="mobile-bottom-nav-item">
+        <Link href="/tournaments" className={"mobile-bottom-nav-item" + (isActive("/tournaments") ? " active" : "")}>
           <span aria-hidden="true">🎾</span>
           <span>大会を探す</span>
         </Link>
-        <Link href="/favorites" className="mobile-bottom-nav-item">
+        <Link href="/favorites" className={"mobile-bottom-nav-item" + (isActive("/favorites") ? " active" : "")}>
           <span aria-hidden="true">♡</span>
           <span>お気に入り</span>
         </Link>
-        <Link href="/recent" className="mobile-bottom-nav-item">
+        <Link href="/recent" className={"mobile-bottom-nav-item" + (isActive("/recent") ? " active" : "")}>
           <span aria-hidden="true">🕘</span>
           <span>最近見た</span>
         </Link>
@@ -67,6 +91,11 @@ export function Header() {
               white-space: nowrap;
             }
 
+            .header-nav a.active {
+              color: var(--blue);
+              font-weight: 800;
+            }
+
             .mobile-bottom-nav {
               display: none;
             }
@@ -83,6 +112,10 @@ export function Header() {
               font-size: 10px;
               line-height: 1.2;
               font-weight: 700;
+            }
+
+            .mobile-bottom-nav-item.active {
+              color: var(--blue);
             }
 
             .mobile-bottom-nav-item span:first-child {
