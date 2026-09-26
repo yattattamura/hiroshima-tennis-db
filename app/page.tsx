@@ -198,7 +198,10 @@ export default async function Home() {
             <h1>広島の大会を探す</h1>
           </div>
 
-          <SearchForm cities={cities} />
+          <SearchForm
+            cities={cities}
+            title="検索条件を指定"
+          />
         </div>
       </section>
 
