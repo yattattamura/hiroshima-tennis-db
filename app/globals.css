@@ -1501,6 +1501,11 @@ textarea:focus {
     border-top: 1px solid var(--border);
   }
 
+  .detail-keyitem:nth-child(5) {
+    grid-column: 1 / -1;
+    border-right: 0;
+  }
+
   .detail-keyitem strong {
     font-size: 13px;
   }
