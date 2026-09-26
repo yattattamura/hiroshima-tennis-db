@@ -484,27 +484,51 @@ textarea:focus {
 .tournament-card {
   padding: 14px;
   display: grid;
-  grid-template-columns: 70px 1fr auto;
-  gap: 14px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
   align-items: center;
-}
-
-.tournament-card-link {
-  color: inherit;
-  text-decoration: none;
   transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
 
-.tournament-card-link:hover {
-  color: inherit;
-  text-decoration: none;
+.tournament-card:hover {
   transform: translateY(-1px);
   box-shadow: 0 8px 24px rgba(30, 70, 110, 0.08);
 }
 
-.tournament-card-link:focus-visible {
+.tournament-card:focus-within {
+  box-shadow: 0 0 0 3px rgba(23, 105, 209, 0.1);
+}
+
+.tournament-card-content-link {
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+  display: grid;
+  grid-template-columns: 70px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+}
+
+.tournament-card-content-link:hover {
+  color: inherit;
+  text-decoration: none;
+}
+
+.tournament-card-content-link:focus-visible {
   outline: 3px solid rgba(23, 105, 209, 0.22);
   outline-offset: 2px;
+  border-radius: 8px;
+}
+
+.tournament-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.tournament-card-actions .outline-button {
+  min-width: 84px;
 }
 
 .tournament-organizer {
@@ -987,7 +1011,7 @@ textarea:focus {
 
   .tournament-card-actions {
     display: grid;
-    grid-template-columns: auto 1fr;
+    grid-template-columns: auto minmax(0, 1fr);
     gap: 8px;
     align-items: center;
     margin-top: 10px;
