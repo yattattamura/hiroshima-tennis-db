@@ -134,7 +134,8 @@ export default async function TournamentDetail({
 
   const showOfficialAction =
     hasOfficialUrl &&
-    (!hasApplicationUrl || officialUrl !== applicationMethod);
+    hasApplicationUrl &&
+    officialUrl !== applicationMethod;
 
   const primaryActionLabel = hasApplicationUrl
     ? "申込ページを開く"
@@ -418,7 +419,7 @@ export default async function TournamentDetail({
                   target="_blank"
                   rel="noreferrer"
                 >
-                  公式情報 ↗
+                  公式情報を見る ↗
                 </a>
               ) : null}
 
