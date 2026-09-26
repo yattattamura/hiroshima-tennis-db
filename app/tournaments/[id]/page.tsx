@@ -132,6 +132,14 @@ export default async function TournamentDetail({
   const hasApplicationUrl =
     isUrl(applicationMethod);
 
+  const showOfficialAction =
+    hasOfficialUrl &&
+    (!hasApplicationUrl || officialUrl !== applicationMethod);
+
+  const primaryActionLabel = hasApplicationUrl
+    ? "申込ページを開く"
+    : "公式情報を見る";
+
   // ----------------------------------------
   // 最近見た大会用データ
   // ----------------------------------------
@@ -347,9 +355,29 @@ export default async function TournamentDetail({
             ) : null}
 
             <div className="detail-actions">
-              {hasOfficialUrl ? (
+              {hasApplicationUrl ? (
                 <a
                   className="primary"
+                  href={applicationMethod}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {primaryActionLabel} ↗
+                </a>
+              ) : hasOfficialUrl ? (
+                <a
+                  className="primary"
+                  href={officialUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {primaryActionLabel} ↗
+                </a>
+              ) : null}
+
+              {showOfficialAction ? (
+                <a
+                  className="outline-button"
                   href={officialUrl}
                   target="_blank"
                   rel="noreferrer"
@@ -366,8 +394,24 @@ export default async function TournamentDetail({
               </Link>
             </div>
 
-            <div className="detail-mobile-actions">
-              {hasOfficialUrl ? (
+            <div
+              className={
+                "detail-mobile-actions" +
+                (!hasApplicationUrl && !hasOfficialUrl
+                  ? " single-action"
+                  : "")
+              }
+            >
+              {hasApplicationUrl ? (
+                <a
+                  className="primary"
+                  href={applicationMethod}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  申込ページ ↗
+                </a>
+              ) : hasOfficialUrl ? (
                 <a
                   className="primary"
                   href={officialUrl}
