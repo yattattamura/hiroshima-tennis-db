@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { FavoriteButton } from "@/components/FavoriteButton";
 
 const STORAGE_KEY = "hiroshima-tennis-db-recent-v1";
 
@@ -177,96 +178,60 @@ export default function RecentPage() {
               }}
             >
               {items.map((item) => (
-                <div
+                <article
                   key={item.id}
-                  className="card"
-                  style={{
-                    padding: 18,
-                  }}
+                  className="card tournament-card recent-tournament-card"
                 >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent:
-                        "space-between",
-                      alignItems:
-                        "flex-start",
-                      gap: 12,
-                    }}
+                  <Link
+                    href={"/tournaments/" + item.id}
+                    className="recent-tournament-card-link"
+                    aria-label={item.name + "の詳細を見る"}
                   >
-                    <Link
-                      href={`/tournaments/${item.id}`}
-                      style={{
-                        flex: 1,
-                        minWidth: 0,
-                        textDecoration:
-                          "none",
-                      }}
+                    <div
+                      className="date-box date-box-v6"
+                      aria-label={"開催日 " + (item.date || "開催日未設定")}
                     >
-                      <strong
-                        style={{
-                          display:
-                            "block",
-                          fontSize: 17,
-                          lineHeight: 1.5,
-                        }}
-                      >
-                        {item.name}
-                      </strong>
+                      <strong>{item.date || "未定"}</strong>
+                    </div>
 
-                      <div
-                        className="muted"
-                        style={{
-                          marginTop: 7,
-                          lineHeight: 1.7,
-                        }}
-                      >
-                        {item.date ||
-                          "開催日未設定"}
+                    <div className="card-main">
+                      <h3>{item.name}</h3>
 
-                        {item.city ||
-                        item.venue
-                          ? ` ・ ${[
-                              item.city,
-                              item.venue,
-                            ]
-                              .filter(
-                                Boolean
-                              )
-                              .join("・")}`
-                          : ""}
-                      </div>
+                      <p className="muted">
+                        📍 {item.city || "エリア未設定"}
+                        {item.venue ? "・" + item.venue : ""}
+                      </p>
 
-                      <div
-                        className="muted"
-                        style={{
-                          marginTop: 3,
-                        }}
-                      >
-                        {item.eventType ||
-                          "種目未設定"}
+                      <p className="muted recent-tournament-meta">
+                        {item.eventType || "種目未設定"}
+                        {item.level ? "・" + item.level : ""}
+                      </p>
+                    </div>
+                  </Link>
 
-                        {item.level
-                          ? ` ・ ${item.level}`
-                          : ""}
-                      </div>
-                    </Link>
-
+                  <div className="recent-tournament-actions">
+                    <FavoriteButton
+                      tournamentId={item.id}
+                      compact
+                    />
                     <button
                       type="button"
                       className="link-button"
-                      onClick={() =>
-                        removeItem(
-                          item.id
-                        )
-                      }
-                      aria-label={`${item.name}を最近見た大会から削除`}
+                      onClick={() => removeItem(item.id)}
+                      aria-label={item.name + "を最近見た大会から削除"}
                     >
                       削除
                     </button>
                   </div>
-                </div>
-              ))}
+
+                  <Link
+                    href={"/tournaments/" + item.id}
+                    className="outline-button recent-tournament-detail-link"
+                  >
+                    詳細 →
+                  </Link>
+                </article>
+              ))
             </div>
           </section>
         )}
