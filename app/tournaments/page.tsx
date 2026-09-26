@@ -1,10 +1,9 @@
 import Link from "next/link";
 
 import { createClient } from "@/lib/supabase/server";
+import { SearchForm } from "@/components/SearchForm";
 import { TournamentCard } from "@/components/TournamentCard";
 import { Tournament } from "@/types/tournament";
-
-export const dynamic = "force-dynamic";
 
 type SearchParams = {
   period?: string;
@@ -26,70 +25,23 @@ function getJapanToday(): string {
     day: "2-digit",
   }).formatToParts(new Date());
 
-  const year = parts.find(
-    (part) => part.type === "year"
-  )?.value ?? "";
-
-  const month = parts.find(
-    (part) => part.type === "month"
-  )?.value ?? "";
-
-  const day = parts.find(
-    (part) => part.type === "day"
-  )?.value ?? "";
+  const year = parts.find((part) => part.type === "year")?.value;
+  const month = parts.find((part) => part.type === "month")?.value;
+  const day = parts.find((part) => part.type === "day")?.value;
 
   return `${year}-${month}-${day}`;
 }
 
-function addDays(
-  dateText: string,
-  days: number
-): string {
-  const [year, month, day] = dateText
-    .split("-")
-    .map(Number);
+function addMonthsToDate(dateText: string, months: number): string {
+  const [year, month, day] = dateText.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
 
-  const date = new Date(
-    Date.UTC(year, month - 1, day)
-  );
+  date.setUTCMonth(date.getUTCMonth() + months);
 
-  date.setUTCDate(
-    date.getUTCDate() + days
-  );
-
-  return date
-    .toISOString()
-    .split("T")[0];
+  return date.toISOString().split("T")[0];
 }
 
-function addMonths(
-  dateText: string,
-  months: number
-): string {
-  const [year, month, day] = dateText
-    .split("-")
-    .map(Number);
-
-  const date = new Date(
-    Date.UTC(year, month - 1, day)
-  );
-
-  date.setUTCMonth(
-    date.getUTCMonth() + months
-  );
-
-  return date
-    .toISOString()
-    .split("T")[0];
-}
-
-function clean(value?: string): string {
-  return value?.trim() ?? "";
-}
-
-function convertTournament(
-  row: any
-): Tournament {
+function convertTournament(row: any): Tournament {
   return {
     id: row.id,
     name: row.name,
@@ -103,60 +55,42 @@ function convertTournament(
     eligibility: row.eligibility ?? "",
     fee: row.fee_text ?? "",
     deadline: row.deadline_text ?? "",
-    applicationMethod:
-      row.application_method ?? "",
+    applicationMethod: row.application_method ?? "",
     officialUrl: row.official_url ?? "",
     status: row.status ?? "",
     notes: row.notes ?? "",
-    eligibilityCategory:
-      row.eligibility_category ?? "",
-    membershipRequired:
-      row.membership_required ?? "",
-    externalAllowed:
-      row.external_allowed ?? "",
-    otherCityAllowed:
-      row.other_city_allowed ?? "",
-    ageCondition:
-      row.age_condition ?? "",
-    searchTokens:
-      row.search_tokens ?? "",
+    eligibilityCategory: row.eligibility_category ?? "",
+    membershipRequired: row.membership_required ?? "",
+    externalAllowed: row.external_allowed ?? "",
+    otherCityAllowed: row.other_city_allowed ?? "",
+    ageCondition: row.age_condition ?? "",
+    searchTokens: row.search_tokens ?? "",
   };
 }
 
-function periodLabel(
-  period: string
-): string {
+function getPeriodLabel(period: string): string {
   switch (period) {
     case "month":
       return "今月";
-
     case "3months":
       return "3か月以内";
-
     case "6months":
       return "6か月以内";
-
     default:
       return "すべて";
   }
 }
 
-function deadlineLabel(
-  deadline: string
-): string {
+function getDeadlineLabel(deadline: string): string {
   switch (deadline) {
     case "open":
-      return "まだ申込可能";
-
+      return "申込可能";
     case "7days":
       return "7日以内に締切";
-
     case "30days":
       return "30日以内に締切";
-
     case "noDeadline":
       return "締切情報なし";
-
     default:
       return "";
   }
@@ -169,26 +103,17 @@ export default async function TournamentsPage({
 }) {
   const params = await searchParams;
 
-  const period = clean(params.period) || "all";
-  const city = clean(params.city);
-  const eventType = clean(
-    params.eventType
-  );
-  const gender = clean(params.gender);
-  const level = clean(params.level);
-  const eligibility = clean(
-    params.eligibility
-  );
-  const keyword = clean(
-    params.keyword
-  );
-  const deadline = clean(
-    params.deadline
-  );
-  const status = clean(params.status);
+  const period = params.period ?? "all";
+  const city = params.city ?? "";
+  const eventType = params.eventType ?? "";
+  const gender = params.gender ?? "";
+  const level = params.level ?? "";
+  const eligibility = params.eligibility ?? "";
+  const keyword = params.keyword?.trim() ?? "";
+  const deadline = params.deadline ?? "";
+  const status = params.status ?? "";
 
   const supabase = await createClient();
-
   const today = getJapanToday();
 
   let query = supabase
@@ -202,7 +127,6 @@ export default async function TournamentsPage({
       ascending: true,
     });
 
-  // キーワード検索
   if (keyword) {
     const safeKeyword = keyword
       .replace(/[%_]/g, "")
@@ -223,462 +147,245 @@ export default async function TournamentsPage({
     }
   }
 
-  // 市町村
   if (city) {
-    query = query.eq(
-      "city",
-      city
-    );
+    query = query.eq("city", city);
   }
 
-  // 種目
   if (eventType) {
-    query = query.ilike(
-      "event_type",
-      `%${eventType}%`
-    );
+    query = query.eq("event_type", eventType);
   }
 
-  // 性別
   if (gender) {
-    query = query.ilike(
-      "gender",
-      `%${gender}%`
-    );
+    query = query.eq("gender", gender);
   }
 
-  // レベル
-  if (level === "CD") {
-    query = query.or(
-      "level.eq.CD,level.eq.C/D"
-    );
-  } else if (level === "AB") {
-    query = query.or(
-      "level.eq.AB,level.eq.A/B"
-    );
-  } else if (level) {
-    query = query.eq(
-      "level",
-      level
-    );
+  if (level) {
+    query = query.eq("level", level);
   }
 
-  // 参加資格
   if (eligibility === "external") {
-    query = query.eq(
-      "external_allowed",
-      "可"
-    );
+    query = query.eq("external_allowed", "可");
   }
 
   if (eligibility === "otherCity") {
-    query = query.eq(
-      "other_city_allowed",
-      "可"
-    );
+    query = query.eq("other_city_allowed", "可");
   }
 
   if (eligibility === "visitor") {
-    query = query.eq(
-      "eligibility_category",
-      "ビジター参加可"
-    );
+    query = query.eq("eligibility_category", "ビジター参加可");
   }
 
-  // ステータス
   if (status) {
-    query = query.eq(
-      "status",
-      status
-    );
+    query = query.eq("status", status);
   }
 
-  // 開催時期
   if (period === "month") {
-    const nextMonth = addMonths(
-      today,
-      1
-    );
-
-    query = query
-      .gte("start_date", today)
-      .lt(
-        "start_date",
-        nextMonth
-      );
+    const nextMonth = addMonthsToDate(today, 1);
+    query = query.gte("start_date", today).lt("start_date", nextMonth);
   }
 
   if (period === "3months") {
-    const afterThreeMonths =
-      addMonths(today, 3);
-
+    const afterThreeMonths = addMonthsToDate(today, 3);
     query = query
       .gte("start_date", today)
-      .lt(
-        "start_date",
-        afterThreeMonths
-      );
+      .lt("start_date", afterThreeMonths);
   }
 
   if (period === "6months") {
-    const afterSixMonths =
-      addMonths(today, 6);
-
+    const afterSixMonths = addMonthsToDate(today, 6);
     query = query
       .gte("start_date", today)
-      .lt(
-        "start_date",
-        afterSixMonths
-      );
+      .lt("start_date", afterSixMonths);
   }
 
-  // 申込締切
   if (deadline === "open") {
-    query = query.gte(
-      "deadline_date",
-      today
-    );
+    query = query.gte("deadline_date", today);
   }
 
   if (deadline === "7days") {
-    const sevenDaysLater =
-      addDays(today, 7);
+    const date = new Date(`${today}T00:00:00Z`);
+    date.setUTCDate(date.getUTCDate() + 7);
+    const sevenDaysLater = date.toISOString().split("T")[0];
 
     query = query
-      .gte(
-        "deadline_date",
-        today
-      )
-      .lte(
-        "deadline_date",
-        sevenDaysLater
-      );
+      .gte("deadline_date", today)
+      .lte("deadline_date", sevenDaysLater);
   }
 
   if (deadline === "30days") {
-    const thirtyDaysLater =
-      addDays(today, 30);
+    const date = new Date(`${today}T00:00:00Z`);
+    date.setUTCDate(date.getUTCDate() + 30);
+    const thirtyDaysLater = date.toISOString().split("T")[0];
 
     query = query
-      .gte(
-        "deadline_date",
-        today
-      )
-      .lte(
-        "deadline_date",
-        thirtyDaysLater
-      );
+      .gte("deadline_date", today)
+      .lte("deadline_date", thirtyDaysLater);
   }
 
   if (deadline === "noDeadline") {
-    query = query.is(
-      "deadline_date",
-      null
-    );
+    query = query.is("deadline_date", null);
   }
 
-  const {
-    data,
-    error,
-  } = await query;
+  const [tournamentResult, citiesResult] = await Promise.all([
+    query,
+    supabase
+      .from("tournaments")
+      .select("city")
+      .not("city", "is", null),
+  ]);
 
-  if (error) {
+  const { data, error } = tournamentResult;
+
+  if (error || citiesResult.error) {
     return (
       <div className="search-page">
         <div className="container">
           <div
             className="card"
-            style={{
-              padding: 30,
-              marginTop: 20,
-            }}
+            style={{ padding: 24, marginTop: 20 }}
           >
-            <h1>
-              大会データの取得に失敗しました
-            </h1>
-
+            <h1 style={{ marginTop: 0 }}>大会データを取得できませんでした</h1>
+            <p className="muted">Supabaseから大会情報を取得できませんでした。</p>
             <p className="muted">
-              Supabaseから大会情報を取得できませんでした。
+              {error?.message ?? citiesResult.error?.message ?? "データの取得に失敗しました。"}
             </p>
-
-            <p className="muted">
-              {error.message}
-            </p>
-
-            <div
-              style={{
-                marginTop: 20,
-              }}
-            >
-              <Link
-                href="/"
-                className="outline-button"
-              >
-                トップへ戻る
-              </Link>
-            </div>
+            <Link href="/" className="outline-button">
+              ホームへ戻る
+            </Link>
           </div>
         </div>
       </div>
     );
   }
 
-  const tournaments: Tournament[] =
-    (data ?? []).map(
-      convertTournament
-    );
+  const tournaments: Tournament[] = (data ?? []).map(convertTournament);
 
-  const conditions: string[] = [];
+  const cities = Array.from(
+    new Set(
+      (citiesResult.data ?? [])
+        .map((row) => row.city)
+        .filter(
+          (city): city is string =>
+            typeof city === "string" && city.trim().length > 0
+        )
+    )
+  ).sort((a, b) => a.localeCompare(b, "ja"));
 
-  if (keyword) {
-    conditions.push(
-      `キーワード: ${keyword}`
-    );
-  }
+  const activeConditions: string[] = [];
 
-  if (period !== "all") {
-    conditions.push(
-      `開催時期: ${periodLabel(period)}`
-    );
-  }
-
-  if (city) {
-    conditions.push(
-      `市町村: ${city}`
-    );
-  }
-
-  if (eventType) {
-    conditions.push(
-      `種目: ${eventType}`
-    );
-  }
-
-  if (gender) {
-    conditions.push(
-      `性別: ${gender}`
-    );
-  }
-
-  if (level) {
-    conditions.push(
-      `レベル: ${level}`
-    );
-  }
-
-  if (eligibility === "external") {
-    conditions.push(
-      "参加資格: 非会員でも参加OK"
-    );
-  }
-
-  if (eligibility === "otherCity") {
-    conditions.push(
-      "参加資格: 他市協会員OK"
-    );
-  }
-
-  if (eligibility === "visitor") {
-    conditions.push(
-      "参加資格: ビジターOK"
-    );
-  }
-
-  if (deadline) {
-    conditions.push(
-      `申込締切: ${deadlineLabel(
-        deadline
-      )}`
-    );
-  }
-
-  if (status) {
-    conditions.push(
-      `ステータス: ${status}`
-    );
-  }
+  if (keyword) activeConditions.push(`キーワード: ${keyword}`);
+  if (period !== "all") activeConditions.push(getPeriodLabel(period));
+  if (city) activeConditions.push(city);
+  if (eventType) activeConditions.push(eventType);
+  if (gender) activeConditions.push(gender);
+  if (level) activeConditions.push(level);
+  if (eligibility === "external") activeConditions.push("非会員OK");
+  if (eligibility === "otherCity") activeConditions.push("他市協会員OK");
+  if (eligibility === "visitor") activeConditions.push("ビジターOK");
+  if (deadline) activeConditions.push(getDeadlineLabel(deadline));
+  if (status) activeConditions.push(status);
 
   return (
     <div className="search-page">
       <div className="container">
-
         <div className="breadcrumb">
-          <Link href="/">
-            ホーム
-          </Link>
-          {" → "}
-          <span>
-            大会を探す
-          </span>
+          <Link href="/">ホーム</Link>
+          {" → 大会を探す"}
         </div>
 
         <div
-          className="results-layout"
           style={{
-            marginTop: 20,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 12,
+            marginBottom: 12,
           }}
         >
-
-          <aside className="filters">
-
-            <div
-              className="card"
-              style={{
-                padding: 24,
-              }}
+          <div>
+            <h1
+              className="section-title"
+              style={{ margin: 0 }}
             >
-              <strong>
-                大会一覧
-              </strong>
+              大会を探す
+            </h1>
+            <p className="muted" style={{ margin: "4px 0 0" }}>
+              {tournaments.length}件
+            </p>
+          </div>
+          <Link href="/" className="section-link">
+            ホームへ
+          </Link>
+        </div>
 
-              <p className="muted">
-                {tournaments.length}件の大会が見つかりました
-              </p>
+        <SearchForm cities={cities} />
 
-              <Link
-                href="/"
-                className="outline-button"
-              >
-                トップへ戻る
-              </Link>
-            </div>
+        {activeConditions.length > 0 && (
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              alignItems: "center",
+              gap: 6,
+              margin: "12px 0 14px",
+            }}
+          >
+            <span className="muted" style={{ fontSize: 12 }}>
+              条件
+            </span>
+            {activeConditions.map((condition) => (
+              <span className="badge" key={condition}>
+                {condition}
+              </span>
+            ))}
+            <Link href="/tournaments" className="section-link">
+              クリア
+            </Link>
+          </div>
+        )}
 
+        <section className="results">
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 12,
+              marginBottom: 2,
+            }}
+          >
+            <h2 style={{ margin: 0, fontSize: 18 }}>
+              検索結果
+            </h2>
+            <span className="muted" style={{ fontSize: 13 }}>
+              {tournaments.length}件
+            </span>
+          </div>
+
+          {tournaments.map((tournament) => (
+            <TournamentCard
+              key={tournament.id}
+              tournament={tournament}
+            />
+          ))}
+
+          {tournaments.length === 0 && (
             <div
-              className="card"
-              style={{
-                padding: 24,
-                marginTop: 16,
-              }}
-            >
-              <strong>
-                検索条件
-              </strong>
-
-              {conditions.length > 0 ? (
-                <div
-                  style={{
-                    display: "grid",
-                    gap: 8,
-                    marginTop: 14,
-                  }}
-                >
-                  {conditions.map(
-                    (condition) => (
-                      <div
-                        key={condition}
-                        className="muted"
-                      >
-                        {condition}
-                      </div>
-                    )
-                  )}
-
-                  <div
-                    style={{
-                      marginTop: 8,
-                    }}
-                  >
-                    <Link
-                      href="/tournaments"
-                      className="outline-button"
-                    >
-                      条件をクリア
-                    </Link>
-                  </div>
-                </div>
-              ) : (
-                <p
-                  className="muted"
-                  style={{
-                    marginTop: 14,
-                  }}
-                >
-                  すべての大会を表示しています。
-                </p>
-              )}
-            </div>
-          </aside>
-
-          <section className="results">
-
-            <div
-              style={{
-                display: "flex",
-                justifyContent:
-                  "space-between",
-                alignItems: "center",
-                gap: 16,
-                flexWrap: "wrap",
-                marginBottom: 16,
-              }}
+              className="card empty-card"
+              style={{ marginTop: 2 }}
             >
               <div>
-                <h1
-                  style={{
-                    margin: 0,
-                  }}
-                >
-                  大会検索結果
-                </h1>
-
-                <p
-                  className="muted"
-                  style={{
-                    marginTop: 6,
-                  }}
-                >
-                  {tournaments.length}件
+                <strong>大会が見つかりません</strong>
+                <p className="muted" style={{ margin: "5px 0 0", fontSize: 13 }}>
+                  条件を少し変えて検索してください。
                 </p>
               </div>
-
-              <Link
-                href="/"
-                className="outline-button"
-              >
-                検索条件を変更
+              <Link href="/tournaments" className="outline-button">
+                条件をクリア
               </Link>
             </div>
-
-            {tournaments.map(
-              (tournament) => (
-                <TournamentCard
-                  key={tournament.id}
-                  tournament={tournament}
-                />
-              )
-            )}
-
-            {tournaments.length === 0 && (
-              <div
-                className="card"
-                style={{
-                  padding: 30,
-                }}
-              >
-                <h3>
-                  条件に一致する大会がありません
-                </h3>
-
-                <p className="muted">
-                  検索条件を変更して、もう一度お試しください。
-                </p>
-
-                <div
-                  style={{
-                    marginTop: 18,
-                  }}
-                >
-                  <Link
-                    href="/"
-                    className="outline-button"
-                  >
-                    条件をクリア
-                  </Link>
-                </div>
-              </div>
-            )}
-          </section>
-        </div>
+          )}
+        </section>
       </div>
     </div>
   );
