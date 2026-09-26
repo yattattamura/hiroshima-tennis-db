@@ -875,9 +875,9 @@ textarea:focus {
     grid-template-columns: repeat(4, 1fr);
     gap: 2px;
     padding: 7px 8px calc(7px + env(safe-area-inset-bottom));
-    background: rgba(255, 255, 255, 0.97);
-    border-top: 1px solid var(--border);
-    box-shadow: 0 -5px 18px rgba(30, 70, 110, 0.08);
+    background: #eef5fc;
+    border-top: 1px solid #cbd9e8;
+    box-shadow: 0 -5px 18px rgba(30, 70, 110, 0.12);
   }
 
   body:has(.detail-mobile-actions) {
