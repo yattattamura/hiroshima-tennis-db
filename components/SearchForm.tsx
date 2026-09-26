@@ -167,7 +167,7 @@ export function SearchForm({
 
           <label>
             <span>締切</span>
-            <select name="deadline" defaultValue="">
+            <select name="deadline" defaultValue="open">
               <option value="">指定なし</option>
               <option value="open">まだ申込可能</option>
               <option value="7days">7日以内に締切</option>
