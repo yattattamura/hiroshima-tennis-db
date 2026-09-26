@@ -62,8 +62,53 @@ export default function RootLayout({
           {children}
         </main>
 
-        <footer className="site-footer">
-          {SITE_NAME}
+        <footer
+          className="site-footer"
+          style={{
+            padding: "28px 0",
+          }}
+        >
+          <div
+            className="container"
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              gap: 20,
+              flexWrap: "wrap",
+            }}
+          >
+            <div>
+              <strong>{SITE_NAME}</strong>
+              <div
+                className="muted"
+                style={{
+                  marginTop: 6,
+                  fontSize: 13,
+                }}
+              >
+                広島県の一般・社会人向けテニス大会情報ポータル
+              </div>
+            </div>
+
+            <nav
+              aria-label="フッターナビゲーション"
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 10,
+                fontSize: 13,
+              }}
+            >
+              <a href="/about">このサイトについて</a>
+              <a href="/areas">掲載エリア</a>
+              <a href="/organizers">掲載主催者</a>
+              <a href="/terms">利用規約</a>
+              <a href="/privacy">プライバシーポリシー</a>
+              <a href="/contact">お問い合わせ</a>
+              <a href="/operator">運営者情報</a>
+            </nav>
+          </div>
         </footer>
       </body>
     </html>
