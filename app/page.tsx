@@ -19,6 +19,7 @@ type SearchTournamentRow = {
   eligibility: string | null;
   fee_text: string | null;
   deadline_text: string | null;
+  deadline_date?: string | null;
   application_method: string | null;
   official_url: string | null;
   status: string | null;
@@ -70,6 +71,8 @@ function convertTournament(row: SearchTournamentRow): Tournament {
     deadline: row.deadline_text ?? "",
     applicationMethod:
       row.application_method ?? "",
+    deadlineDate:
+      row.deadline_date ?? "",
     officialUrl: row.official_url ?? "",
     status: row.status ?? "",
     notes: row.notes ?? "",
@@ -232,7 +235,7 @@ export default async function Home() {
       <section className="container home-stats" aria-label="サイト情報">
         <div className="stats">
           <Link
-            href="/tournaments?deadline="
+            href="/tournaments?deadline=all"
             className="stat stat-link"
             aria-label="開催予定の大会を見る"
           >
