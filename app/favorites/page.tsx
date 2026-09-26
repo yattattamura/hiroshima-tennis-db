@@ -57,6 +57,7 @@ function convertTournament(row: any): Tournament {
     eligibility: row.eligibility ?? "",
     fee: row.fee_text ?? "",
     deadline: row.deadline_text ?? "",
+    deadlineDate: row.deadline_date ?? "",
     applicationMethod: row.application_method ?? "",
     officialUrl: row.official_url ?? "",
     status: row.status ?? "",
