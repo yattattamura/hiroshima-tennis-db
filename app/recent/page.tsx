@@ -231,7 +231,7 @@ export default function RecentPage() {
                     詳細 →
                   </Link>
                 </article>
-              ))
+              ))}
             </div>
           </section>
         )}
