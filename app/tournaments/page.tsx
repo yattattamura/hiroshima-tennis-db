@@ -409,43 +409,27 @@ export default async function TournamentsPage({
         />
 
         {activeConditions.length > 0 && (
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              alignItems: "center",
-              gap: 6,
-              margin: "12px 0 14px",
-            }}
-          >
-            <span className="muted" style={{ fontSize: 12 }}>
-              条件
-            </span>
-            {activeConditions.map((condition) => (
-              <span className="badge" key={condition}>
-                {condition}
-              </span>
-            ))}
-            <Link href={"/tournaments"} className="section-link">
-              クリア
+          <div className="search-active-conditions" aria-label="現在の絞り込み条件">
+            <div className="search-active-conditions-title">
+              <span aria-hidden="true">🔎</span>
+              <strong>絞り込み中</strong>
+            </div>
+            <div className="search-active-condition-list">
+              {activeConditions.map((condition) => (
+                <span className="badge" key={condition}>
+                  {condition}
+                </span>
+              ))}
+            </div>
+            <Link href="/tournaments" className="section-link">
+              すべてクリア
             </Link>
           </div>
         )}
 
         <section className="results">
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: 12,
-              marginBottom: 8,
-            }}
-          >
+          <div className="search-results-heading">
             <h2 style={{ margin: 0, fontSize: 18 }}>検索結果</h2>
-            <span className="muted" style={{ fontSize: 13 }}>
-              {startItem}〜{endItem} / {totalCount}件
-            </span>
           </div>
 
           {tournaments.map((tournament) => (
