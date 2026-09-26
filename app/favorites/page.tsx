@@ -3,7 +3,6 @@ import { cookies } from "next/headers";
 
 import { createClient } from "@/lib/supabase/server";
 import { TournamentCard } from "@/components/TournamentCard";
-import { FavoriteButton } from "@/components/FavoriteButton";
 import { Tournament } from "@/types/tournament";
 
 const COOKIE_NAME = "htdb_favorites";
@@ -231,64 +230,15 @@ export default async function FavoritesPage() {
         </div>
 
         {favoriteRows.length > 0 ? (
-          <div style={{ display: "grid", gap: 14 }}>
-            {favoriteRows.map((row, index) => {
-              const tournament = tournaments[index];
-              const deadlineInfo = getDeadlineInfo(
-                row.deadline_date ?? null,
-                today
-              );
-              const deadlineText = formatDeadlineText(
-                row.deadline_date ?? null
-              );
+          <div style={{ display: "grid", gap: 12 }}>
+            {favoriteRows.map((row) => {
+              const tournament = convertTournament(row);
 
               return (
-                <section key={tournament.id}>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      gap: 10,
-                      marginBottom: 6,
-                      padding: "0 2px",
-                      flexWrap: "wrap",
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 7,
-                        minWidth: 0,
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontSize: 13,
-                          fontWeight: 800,
-                          color:
-                            deadlineInfo.tone === "urgent"
-                              ? "#b42318"
-                              : deadlineInfo.tone === "warning"
-                                ? "#9a6700"
-                                : "var(--text)",
-                        }}
-                      >
-                        {deadlineInfo.label}
-                      </span>
-                      {deadlineText ? (
-                        <span className="muted" style={{ fontSize: 12 }}>
-                          {deadlineText}
-                        </span>
-                      ) : null}
-                    </div>
-
-                    <FavoriteButton tournamentId={tournament.id} />
-                  </div>
-
-                  <TournamentCard tournament={tournament} />
-                </section>
+                <TournamentCard
+                  key={tournament.id}
+                  tournament={tournament}
+                />
               );
             })}
           </div>
