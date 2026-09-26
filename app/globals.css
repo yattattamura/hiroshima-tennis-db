@@ -1491,6 +1491,8 @@ textarea:focus {
   .detail-keyitem {
     padding: 10px 9px;
     border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    border-top: 0;
   }
 
   .detail-keyitem:nth-child(2n) {
@@ -1498,13 +1500,13 @@ textarea:focus {
   }
 
   .detail-keyitem:nth-child(n + 3) {
-    border-top: 1px solid var(--border);
+    border-top: 0;
   }
 
   .detail-keyitem:nth-child(5) {
     grid-column: 1 / -1;
     border-right: 0;
-    border-top: 1px solid var(--border);
+    border-bottom: 0;
     box-sizing: border-box;
   }
 
