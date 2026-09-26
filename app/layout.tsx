@@ -13,9 +13,9 @@ export const metadata: Metadata = {
 
   title: {
     default:
-      "広島テニスDB｜広島県のテニス大会検索",
+      "広島テニスポータル｜広島県のテニス大会検索",
     template:
-      "%s | 広島テニスDB",
+      "%s | 広島テニスポータル",
   },
 
   description:
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     locale: "ja_JP",
     siteName: SITE_NAME,
     title:
-      "広島テニスDB｜広島県のテニス大会検索",
+      "広島テニスポータル｜広島県のテニス大会検索",
     description:
       SITE_DESCRIPTION,
     url: SITE_URL,
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary",
     title:
-      "広島テニスDB｜広島県のテニス大会検索",
+      "広島テニスポータル｜広島県のテニス大会検索",
     description:
       SITE_DESCRIPTION,
   },
