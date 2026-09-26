@@ -177,6 +177,26 @@ export default async function TournamentDetail({
             </Link>
           </div>
 
+          <div className="detail-mobile-actions">
+            {hasOfficialUrl ? (
+              <a
+                className="primary"
+                href={officialUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                公式情報 ↗
+              </a>
+            ) : null}
+
+            <Link
+              className="outline-button"
+              href={`/tournaments/${tournament.id}/suggest`}
+            >
+              修正する
+            </Link>
+          </div>
+
           <section className="detail-section">
             <h2>大会情報</h2>
             <div className="info-table">
