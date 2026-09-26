@@ -3,8 +3,9 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { TournamentCard } from "@/components/TournamentCard";
 import { SearchForm } from "@/components/SearchForm";
+import { Tournament } from "@/types/tournament";
 
-type Tournament = {
+type SearchTournamentRow = {
   id: string;
   name: string;
   organizer_name_raw: string | null;
@@ -53,9 +54,7 @@ function getJapanToday(): string {
   return `${year}-${month}-${day}`;
 }
 
-function convertTournament(
-  row: Tournament
-) {
+function convertTournament(row: SearchTournamentRow): Tournament {
   return {
     id: row.id,
     name: row.name,
@@ -91,7 +90,6 @@ function convertTournament(
 
 export default async function Home() {
   const supabase = await createClient();
-
   const today = getJapanToday();
 
   const [
@@ -109,12 +107,10 @@ export default async function Home() {
         nullsFirst: false,
       })
       .limit(3),
-
     supabase
       .from("tournaments")
       .select("city")
       .not("city", "is", null),
-
     supabase
       .from("tournaments")
       .select("id", {
@@ -122,7 +118,6 @@ export default async function Home() {
         head: true,
       })
       .gte("start_date", today),
-
     supabase
       .from("organizers")
       .select("id", {
@@ -150,19 +145,13 @@ export default async function Home() {
           <div
             className="card"
             style={{
-              padding: 30,
-              marginTop: 40,
+              padding: 24,
+              marginTop: 32,
             }}
           >
             <h1>広島テニスDB</h1>
-
-            <p>
-              大会データの取得に失敗しました。
-            </p>
-
-            <p className="muted">
-              {errorMessage}
-            </p>
+            <p>大会データを取得できませんでした。</p>
+            <p className="muted">{errorMessage}</p>
           </div>
         </div>
       </div>
@@ -171,7 +160,9 @@ export default async function Home() {
 
   const featured = (
     featuredResult.data ?? []
-  ).map(convertTournament);
+  ).map((row) =>
+    convertTournament(row as SearchTournamentRow)
+  );
 
   const cities = Array.from(
     new Set(
@@ -195,70 +186,23 @@ export default async function Home() {
 
   return (
     <>
-      <section className="hero">
+      <section className="hero home-hero">
         <div className="container">
-          <h1>
-            広島のテニス大会を、
-            <br />
-            もっと手軽に、もっと近くに。
-          </h1>
-
-          <p>
-            広島県内のテニス大会情報を横断検索できる、
-            広島テニスDBです。
-          </p>
+          <div className="hero-copy">
+            <p className="hero-eyebrow">
+              広島県の社会人・一般テニス大会
+            </p>
+            <h1>広島の大会を探す</h1>
+          </div>
 
           <SearchForm cities={cities} />
         </div>
       </section>
 
-      <div className="container">
-        <div className="stats">
-          <div className="stat">
-            <strong>
-              {tournamentCount}
-            </strong>
-            今後の大会
-          </div>
-
-          <div className="stat">
-            <strong>
-              {cities.length}
-            </strong>
-            対応エリア
-          </div>
-
-          <div className="stat">
-            <strong>
-              {organizerCount}
-            </strong>
-            主催者・団体
-          </div>
-
-          <div className="stat">
-            <strong>
-              公式確認
-            </strong>
-            情報源を明記
-          </div>
-        </div>
-      </div>
-
-      <section className="section container">
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: 16,
-          }}
-        >
-          <h2>今後の大会</h2>
-
-          <Link
-            href="/tournaments"
-            className="muted"
-          >
+      <section className="section container home-featured">
+        <div className="section-heading">
+          <h2>直近の大会</h2>
+          <Link href="/tournaments" className="section-link">
             すべて見る →
           </Link>
         </div>
@@ -273,35 +217,33 @@ export default async function Home() {
             ))}
           </div>
         ) : (
-          <div
-            className="card"
-            style={{
-              padding: 30,
-              marginTop: 20,
-            }}
-          >
-            <h3>
-              現在、今後の大会が登録されていません
-            </h3>
-
-            <p className="muted">
-              大会情報は順次追加していきます。
-            </p>
-
-            <div
-              style={{
-                marginTop: 18,
-              }}
+          <div className="card empty-card">
+            <strong>大会情報がありません</strong>
+            <Link
+              href="/tournaments"
+              className="outline-button"
             >
-              <Link
-                href="/tournaments"
-                className="outline-button"
-              >
-                大会一覧を見る
-              </Link>
-            </div>
+              大会一覧を見る
+            </Link>
           </div>
         )}
+      </section>
+
+      <section className="container home-stats" aria-label="サイト情報">
+        <div className="stats">
+          <div className="stat">
+            <strong>{tournamentCount}</strong>
+            <span>開催予定</span>
+          </div>
+          <div className="stat">
+            <strong>{cities.length}</strong>
+            <span>エリア</span>
+          </div>
+          <div className="stat">
+            <strong>{organizerCount}</strong>
+            <span>主催者</span>
+          </div>
+        </div>
       </section>
     </>
   );
