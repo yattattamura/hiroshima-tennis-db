@@ -18,40 +18,164 @@ type Tournament = {
   data_quality_note: string | null;
 };
 
+type QualityRow = {
+  tournament: Tournament;
+  issues: string[];
+  urgent: boolean;
+  stale: boolean;
+  past: boolean;
+};
+
+const STALE_DAYS = 30;
+
+function getJapanToday(): string {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Tokyo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date());
+
+  const year = parts.find((part) => part.type === "year")?.value;
+  const month = parts.find((part) => part.type === "month")?.value;
+  const day = parts.find((part) => part.type === "day")?.value;
+
+  return `${year}-${month}-${day}`;
+}
+
+function getDateKey(value: string | null): string | null {
+  if (!value) {
+    return null;
+  }
+
+  const key = value.slice(0, 10);
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) {
+    return null;
+  }
+
+  const date = new Date(`${key}T00:00:00Z`);
+
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  return key;
+}
+
+function daysBetween(
+  olderDate: string,
+  newerDate: string
+): number {
+  const older = new Date(`${olderDate}T00:00:00Z`);
+  const newer = new Date(`${newerDate}T00:00:00Z`);
+
+  return Math.floor(
+    (newer.getTime() - older.getTime()) /
+      (1000 * 60 * 60 * 24)
+  );
+}
+
+function isValidUrl(value: string | null): boolean {
+  if (!value?.trim()) {
+    return false;
+  }
+
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 function buildIssues(
-  tournament: Tournament
-): string[] {
+  tournament: Tournament,
+  today: string
+): {
+  issues: string[];
+  urgent: boolean;
+  stale: boolean;
+} {
   const issues: string[] = [];
 
-  if (!tournament.start_date) {
+  const startDate = getDateKey(
+    tournament.start_date
+  );
+  const deadlineDate = getDateKey(
+    tournament.deadline_date
+  );
+  const checkedDate = getDateKey(
+    tournament.last_checked_at
+  );
+
+  const past = Boolean(
+    startDate && startDate < today
+  );
+
+  if (!startDate) {
     issues.push("開催日未設定");
   }
 
-  if (!tournament.venue_name_raw) {
+  if (!tournament.venue_name_raw?.trim()) {
     issues.push("会場未設定");
   }
 
-  if (!tournament.fee_text) {
+  if (!tournament.fee_text?.trim()) {
     issues.push("参加費未設定");
   }
 
-  if (!tournament.deadline_text) {
+  if (!tournament.deadline_text?.trim()) {
     issues.push("申込締切未設定");
   }
 
-  if (!tournament.official_url) {
+  if (tournament.deadline_text?.trim() && !deadlineDate) {
+    issues.push("締切日未設定");
+  }
+
+  if (!tournament.official_url?.trim()) {
     issues.push("公式URL未設定");
+  } else if (!isValidUrl(tournament.official_url)) {
+    issues.push("公式URL形式要確認");
   }
 
-  if (!tournament.last_checked_at) {
+  let stale = false;
+
+  if (!checkedDate) {
     issues.push("最終確認日未設定");
+  } else if (
+    !past &&
+    daysBetween(checkedDate, today) >= STALE_DAYS
+  ) {
+    stale = true;
+    issues.push("最終確認が30日以上前");
   }
 
-  if (tournament.data_quality_note) {
+  if (startDate && deadlineDate && !past) {
+    if (deadlineDate < today) {
+      issues.push("申込締切経過");
+    }
+
+    if (deadlineDate > startDate) {
+      issues.push("締切日を要確認");
+    }
+  }
+
+  if (tournament.data_quality_note?.trim()) {
     issues.push("品質メモあり");
   }
 
-  return issues;
+  const urgent =
+    issues.includes("申込締切経過") ||
+    issues.includes("開催日未設定") ||
+    issues.includes("公式URL未設定") ||
+    issues.includes("公式URL形式要確認");
+
+  return {
+    issues,
+    urgent,
+    stale,
+  };
 }
 
 function formatDate(
@@ -127,9 +251,7 @@ export default async function DataQualityPage() {
               marginTop: 20,
             }}
           >
-            <h1>
-              データ品質
-            </h1>
+            <h1>データ品質</h1>
 
             <p>
               大会データを取得できませんでした。
@@ -147,26 +269,71 @@ export default async function DataQualityPage() {
   const tournaments =
     (data ?? []) as Tournament[];
 
-  const rows = tournaments
-    .map((tournament) => ({
-      tournament,
-      issues: buildIssues(
-        tournament
-      ),
-    }))
+  const today = getJapanToday();
+
+  const rows: QualityRow[] = tournaments
+    .map((tournament) => {
+      const result = buildIssues(
+        tournament,
+        today
+      );
+
+      const startDate = getDateKey(
+        tournament.start_date
+      );
+
+      return {
+        tournament,
+        issues: result.issues,
+        urgent: result.urgent,
+        stale: result.stale,
+        past: Boolean(
+          startDate && startDate < today
+        ),
+      };
+    })
     .filter(
       (row) => row.issues.length > 0
-    );
+    )
+    .sort((a, b) => {
+      if (a.urgent !== b.urgent) {
+        return a.urgent ? -1 : 1;
+      }
 
-  const issueCount =
-    rows.length;
+      if (a.stale !== b.stale) {
+        return a.stale ? -1 : 1;
+      }
 
-  const issueTotal =
-    rows.reduce(
-      (total, row) =>
-        total + row.issues.length,
-      0
-    );
+      if (a.issues.length !== b.issues.length) {
+        return b.issues.length - a.issues.length;
+      }
+
+      const aDate =
+        getDateKey(a.tournament.start_date) ??
+        "9999-12-31";
+
+      const bDate =
+        getDateKey(b.tournament.start_date) ??
+        "9999-12-31";
+
+      return aDate.localeCompare(bDate);
+    });
+
+  const issueCount = rows.length;
+
+  const issueTotal = rows.reduce(
+    (total, row) =>
+      total + row.issues.length,
+    0
+  );
+
+  const staleCount = rows.filter(
+    (row) => row.stale
+  ).length;
+
+  const urgentCount = rows.filter(
+    (row) => row.urgent
+  ).length;
 
   return (
     <div className="detail-page">
@@ -215,7 +382,17 @@ export default async function DataQualityPage() {
                   margin: 0,
                 }}
               >
-                大会情報の不足や確認が必要な項目を確認します。
+                大会情報の不足、古い確認日、締切情報などをチェックします。
+              </p>
+
+              <p
+                className="muted"
+                style={{
+                  margin: "6px 0 0",
+                  fontSize: 13,
+                }}
+              >
+                基準日：{formatDate(today)}
               </p>
             </div>
 
@@ -227,7 +404,7 @@ export default async function DataQualityPage() {
           style={{
             display: "grid",
             gridTemplateColumns:
-              "repeat(auto-fit, minmax(180px, 1fr))",
+              "repeat(auto-fit, minmax(160px, 1fr))",
             gap: 16,
             marginTop: 20,
           }}
@@ -251,6 +428,16 @@ export default async function DataQualityPage() {
             >
               {issueCount}
             </strong>
+
+            <div
+              className="muted"
+              style={{
+                marginTop: 6,
+                fontSize: 13,
+              }}
+            >
+              / 全{tournaments.length}大会
+            </div>
           </div>
 
           <div
@@ -273,6 +460,69 @@ export default async function DataQualityPage() {
               {issueTotal}
             </strong>
           </div>
+
+          <div
+            className="card"
+            style={{
+              padding: 24,
+            }}
+          >
+            <div className="muted">
+              30日以上未確認
+            </div>
+
+            <strong
+              style={{
+                display: "block",
+                fontSize: 32,
+                marginTop: 8,
+              }}
+            >
+              {staleCount}
+            </strong>
+          </div>
+
+          <div
+            className="card"
+            style={{
+              padding: 24,
+            }}
+          >
+            <div className="muted">
+              優先確認
+            </div>
+
+            <strong
+              style={{
+                display: "block",
+                fontSize: 32,
+                marginTop: 8,
+              }}
+            >
+              {urgentCount}
+            </strong>
+          </div>
+        </div>
+
+        <div
+          className="notice"
+          style={{
+            marginTop: 20,
+          }}
+        >
+          <strong>
+            チェック基準
+          </strong>
+
+          <p
+            style={{
+              marginBottom: 0,
+            }}
+          >
+            開催日・会場・参加費・申込締切・公式URL・最終確認日を確認し、
+            今後開催される大会については、最終確認から30日以上経過した情報も表示します。
+            また、締切日が開催日より後になっている場合や、公式URLの形式が不正な場合も確認対象です。
+          </p>
         </div>
 
         <div
@@ -286,6 +536,9 @@ export default async function DataQualityPage() {
             ({
               tournament,
               issues,
+              urgent,
+              stale,
+              past,
             }) => (
               <article
                 className="card"
@@ -294,22 +547,71 @@ export default async function DataQualityPage() {
                   padding: 24,
                 }}
               >
-                <div className="badges">
-                  <span className="badge">
-                    {issues.length}項目
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent:
+                      "space-between",
+                    alignItems: "flex-start",
+                    gap: 12,
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <div>
+                    <div
+                      className="badges"
+                      style={{
+                        display: "flex",
+                        gap: 6,
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      <span className="badge">
+                        {issues.length}項目
+                      </span>
+
+                      {urgent ? (
+                        <span className="badge green">
+                          優先確認
+                        </span>
+                      ) : null}
+
+                      {stale ? (
+                        <span className="badge">
+                          確認が古い
+                        </span>
+                      ) : null}
+
+                      {past ? (
+                        <span className="badge">
+                          開催終了
+                        </span>
+                      ) : null}
+                    </div>
+
+                    <h2
+                      style={{
+                        marginTop: 12,
+                        marginBottom: 0,
+                      }}
+                    >
+                      {tournament.name}
+                    </h2>
+                  </div>
+
+                  <span
+                    className="muted"
+                    style={{
+                      fontSize: 12,
+                    }}
+                  >
+                    ID: {tournament.id}
                   </span>
                 </div>
 
-                <h2
-                  style={{
-                    marginTop: 12,
-                  }}
-                >
-                  {tournament.name}
-                </h2>
-
                 <p className="muted">
-                  {tournament.city ?? "地域未設定"}
+                  {tournament.city ??
+                    "地域未設定"}
                   {tournament.venue_name_raw
                     ? `・${tournament.venue_name_raw}`
                     : ""}
@@ -337,25 +639,84 @@ export default async function DataQualityPage() {
 
                 <div
                   style={{
+                    display: "grid",
+                    gridTemplateColumns:
+                      "repeat(auto-fit, minmax(180px, 1fr))",
+                    gap: 12,
                     marginTop: 18,
                   }}
                 >
-                  <p className="muted">
-                    開催日：
-                    {formatDate(
-                      tournament.start_date
-                    )}
-                  </p>
+                  <div
+                    className="card"
+                    style={{
+                      padding: 14,
+                      background: "rgba(0,0,0,0.02)",
+                    }}
+                  >
+                    <div
+                      className="muted"
+                      style={{
+                        fontSize: 12,
+                      }}
+                    >
+                      開催日
+                    </div>
 
-                  <p className="muted">
-                    最終確認日：
-                    {formatDate(
-                      tournament.last_checked_at
-                    )}
-                  </p>
+                    <strong>
+                      {formatDate(
+                        tournament.start_date
+                      )}
+                    </strong>
+                  </div>
+
+                  <div
+                    className="card"
+                    style={{
+                      padding: 14,
+                      background: "rgba(0,0,0,0.02)",
+                    }}
+                  >
+                    <div
+                      className="muted"
+                      style={{
+                        fontSize: 12,
+                      }}
+                    >
+                      申込締切
+                    </div>
+
+                    <strong>
+                      {tournament.deadline_text?.trim()
+                        ? tournament.deadline_text
+                        : "未設定"}
+                    </strong>
+                  </div>
+
+                  <div
+                    className="card"
+                    style={{
+                      padding: 14,
+                      background: "rgba(0,0,0,0.02)",
+                    }}
+                  >
+                    <div
+                      className="muted"
+                      style={{
+                        fontSize: 12,
+                      }}
+                    >
+                      最終確認日
+                    </div>
+
+                    <strong>
+                      {formatDate(
+                        tournament.last_checked_at
+                      )}
+                    </strong>
+                  </div>
                 </div>
 
-                {tournament.data_quality_note && (
+                {tournament.data_quality_note ? (
                   <div
                     className="notice"
                     style={{
@@ -378,19 +739,45 @@ export default async function DataQualityPage() {
                       }
                     </p>
                   </div>
-                )}
+                ) : null}
 
                 <div
                   style={{
+                    display: "flex",
+                    gap: 10,
+                    flexWrap: "wrap",
                     marginTop: 20,
                   }}
                 >
+                  <Link
+                    href={`/admin/tournaments/${tournament.id}/edit`}
+                    className="primary"
+                  >
+                    大会を編集
+                  </Link>
+
                   <Link
                     href={`/tournaments/${tournament.id}`}
                     className="outline-button"
                   >
                     大会詳細を見る →
                   </Link>
+
+                  {isValidUrl(
+                    tournament.official_url
+                  ) ? (
+                    <a
+                      href={
+                        tournament.official_url ??
+                        "#"
+                      }
+                      target="_blank"
+                      rel="noreferrer"
+                      className="outline-button"
+                    >
+                      公式ページ ↗
+                    </a>
+                  ) : null}
                 </div>
               </article>
             )
@@ -417,6 +804,7 @@ export default async function DataQualityPage() {
         <div
           style={{
             marginTop: 20,
+            marginBottom: 30,
           }}
         >
           <Link
