@@ -105,7 +105,7 @@ function buildDescription(
       ? parts.join("。")
       : "広島県のテニス大会情報を掲載しています。";
 
-  return `${base} 広島テニスDBで大会情報・参加資格・情報源を確認できます。`;
+  return `${base} 広島テニスポータルで大会情報・参加資格・情報源を確認できます。`;
 }
 
 export async function generateMetadata({
