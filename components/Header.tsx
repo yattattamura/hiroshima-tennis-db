@@ -20,10 +20,31 @@ export function Header() {
             <Link href="/tournaments">大会を探す</Link>
             <Link href="/favorites">お気に入り</Link>
             <Link href="/recent">最近見た</Link>
-            <Link href="/admin">管理者</Link>
           </nav>
         </div>
       </header>
+
+      <nav
+        className="mobile-bottom-nav"
+        aria-label="スマホ用ナビゲーション"
+      >
+        <Link href="/" className="mobile-bottom-nav-item">
+          <span aria-hidden="true">🏠</span>
+          <span>ホーム</span>
+        </Link>
+        <Link href="/tournaments" className="mobile-bottom-nav-item">
+          <span aria-hidden="true">🎾</span>
+          <span>大会を探す</span>
+        </Link>
+        <Link href="/favorites" className="mobile-bottom-nav-item">
+          <span aria-hidden="true">♡</span>
+          <span>お気に入り</span>
+        </Link>
+        <Link href="/recent" className="mobile-bottom-nav-item">
+          <span aria-hidden="true">🕘</span>
+          <span>最近見た</span>
+        </Link>
+      </nav>
 
       <style
         dangerouslySetInnerHTML={{
@@ -44,6 +65,29 @@ export function Header() {
 
             .header-nav a {
               white-space: nowrap;
+            }
+
+            .mobile-bottom-nav {
+              display: none;
+            }
+
+            .mobile-bottom-nav-item {
+              color: var(--muted);
+              text-decoration: none;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              justify-content: center;
+              gap: 2px;
+              min-width: 0;
+              font-size: 10px;
+              line-height: 1.2;
+              font-weight: 700;
+            }
+
+            .mobile-bottom-nav-item span:first-child {
+              font-size: 18px;
+              line-height: 1;
             }
 
             @media (max-width: 700px) {
