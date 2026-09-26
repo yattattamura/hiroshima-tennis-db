@@ -1504,6 +1504,8 @@ textarea:focus {
   .detail-keyitem:nth-child(5) {
     grid-column: 1 / -1;
     border-right: 0;
+    border-top: 1px solid var(--border);
+    box-sizing: border-box;
   }
 
   .detail-keyitem strong {
