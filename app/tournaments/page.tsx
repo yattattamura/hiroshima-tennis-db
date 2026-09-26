@@ -152,7 +152,11 @@ export default async function TournamentsPage({
   const level = params.level ?? "";
   const eligibility = params.eligibility ?? "";
   const keyword = params.keyword?.trim() ?? "";
-  const deadline = params.deadline ?? "open";
+  const deadlineParam = params.deadline;
+  const deadline =
+    deadlineParam === "all"
+      ? ""
+      : deadlineParam ?? "open";
   const status = params.status ?? "";
   const currentPage = getPageNumber(params.page);
 
@@ -271,6 +275,8 @@ export default async function TournamentsPage({
 
   if (deadline === "noDeadline") {
     query = query.is("deadline_date", null);
+  } else if (deadline === "") {
+    query = query.gte("start_date", today);
   }
 
   const from = (currentPage - 1) * PAGE_SIZE;
@@ -387,7 +393,20 @@ export default async function TournamentsPage({
           </Link>
         </div>
 
-        <SearchForm cities={cities} />
+        <SearchForm
+          cities={cities}
+          initialValues={{
+            keyword,
+            period,
+            city,
+            eventType,
+            level,
+            gender,
+            eligibility,
+            deadline: params.deadline ?? "open",
+            status,
+          }}
+        />
 
         {activeConditions.length > 0 && (
           <div
@@ -437,16 +456,29 @@ export default async function TournamentsPage({
           ))}
 
           {tournaments.length === 0 && (
-            <div className="card empty-card" style={{ marginTop: 2 }}>
+            <div className="card empty-card search-empty-state" style={{ marginTop: 2 }}>
               <div>
                 <strong>大会が見つかりません</strong>
                 <p className="muted" style={{ margin: "5px 0 0", fontSize: 13 }}>
-                  条件を少し変えて検索してください。
+                  申込状況や日程条件を少し広げてみてください。
                 </p>
               </div>
-              <Link href="/tournaments" className="outline-button">
-                条件をクリア
-              </Link>
+
+              <div
+                className="search-empty-actions"
+                style={{
+                  display: "flex",
+                  gap: 8,
+                  flexWrap: "wrap",
+                }}
+              >
+                <Link href="/tournaments?deadline=all" className="outline-button">
+                  申込条件を外す
+                </Link>
+                <Link href="/tournaments" className="primary">
+                  全条件をクリア
+                </Link>
+              </div>
             </div>
           )}
 
