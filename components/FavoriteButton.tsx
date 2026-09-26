@@ -41,7 +41,13 @@ function writeFavorites(ids: string[]) {
   window.dispatchEvent(new Event("favorites-changed"));
 }
 
-export function FavoriteButton({ tournamentId }: { tournamentId: string }) {
+export function FavoriteButton({
+  tournamentId,
+  compact = false,
+}: {
+  tournamentId: string;
+  compact?: boolean;
+}) {
   const [isFavorite, setIsFavorite] = useState(false);
   const [isReady, setIsReady] = useState(false);
 
@@ -81,9 +87,10 @@ export function FavoriteButton({ tournamentId }: { tournamentId: string }) {
         display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",
-        gap: 6,
-        minHeight: 38,
-        padding: "8px 12px",
+        gap: compact ? 0 : 6,
+        minHeight: compact ? 36 : 38,
+        minWidth: compact ? 36 : undefined,
+        padding: compact ? "7px" : "8px 12px",
         border: "1px solid var(--border)",
         borderRadius: 8,
         background: isFavorite ? "#fff8df" : "#fff",
@@ -94,7 +101,7 @@ export function FavoriteButton({ tournamentId }: { tournamentId: string }) {
       }}
     >
       <span aria-hidden="true">{isFavorite ? "★" : "☆"}</span>
-      {isFavorite ? "お気に入り済み" : "お気に入り"}
+      {!compact && (isFavorite ? "お気に入り済み" : "お気に入り")}
     </button>
   );
 }
