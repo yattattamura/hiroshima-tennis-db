@@ -39,7 +39,6 @@ export default async function AdminPage() {
         count: "exact",
         head: true,
       }),
-
     supabase
       .from("correction_proposals")
       .select("id", {
@@ -47,7 +46,6 @@ export default async function AdminPage() {
         head: true,
       })
       .eq("status", "pending"),
-
     supabase
       .from("correction_proposals")
       .select("id", {
@@ -55,7 +53,6 @@ export default async function AdminPage() {
         head: true,
       })
       .eq("status", "approved"),
-
     supabase
       .from("correction_proposals")
       .select("id", {
@@ -63,14 +60,12 @@ export default async function AdminPage() {
         head: true,
       })
       .eq("status", "rejected"),
-
     supabase
       .from("event_sources")
       .select("id", {
         count: "exact",
         head: true,
       }),
-
     supabase
       .from("tournaments")
       .select("id", {
@@ -101,7 +96,6 @@ export default async function AdminPage() {
   return (
     <div className="detail-page">
       <div className="container">
-
         <div className="breadcrumb">
           <Link href="/">ホーム</Link>
           {" → "}
@@ -157,7 +151,6 @@ export default async function AdminPage() {
             <div className="muted">
               登録大会
             </div>
-
             <strong
               style={{
                 display: "block",
@@ -167,6 +160,19 @@ export default async function AdminPage() {
             >
               {tournamentCount}
             </strong>
+
+            <div
+              style={{
+                marginTop: 12,
+              }}
+            >
+              <Link
+                href="/admin/tournaments"
+                className="section-link"
+              >
+                大会を管理 →
+              </Link>
+            </div>
           </div>
 
           <div
@@ -176,7 +182,6 @@ export default async function AdminPage() {
             <div className="muted">
               未処理の修正提案
             </div>
-
             <strong
               style={{
                 display: "block",
@@ -195,7 +200,6 @@ export default async function AdminPage() {
             <div className="muted">
               承認済み
             </div>
-
             <strong
               style={{
                 display: "block",
@@ -214,7 +218,6 @@ export default async function AdminPage() {
             <div className="muted">
               情報源
             </div>
-
             <strong
               style={{
                 display: "block",
@@ -237,6 +240,25 @@ export default async function AdminPage() {
           }}
         >
           <Link
+            href="/admin/tournaments"
+            className="card"
+            style={{
+              padding: 26,
+              textDecoration: "none",
+            }}
+          >
+            <h2 style={{ marginTop: 0 }}>
+              大会データ管理
+            </h2>
+            <p className="muted">
+              登録大会を検索して、情報を直接編集します。
+            </p>
+            <strong>
+              大会を管理する →
+            </strong>
+          </Link>
+
+          <Link
             href="/admin/corrections"
             className="card"
             style={{
@@ -244,18 +266,12 @@ export default async function AdminPage() {
               textDecoration: "none",
             }}
           >
-            <h2
-              style={{
-                marginTop: 0,
-              }}
-            >
+            <h2 style={{ marginTop: 0 }}>
               修正提案管理
             </h2>
-
             <p className="muted">
               ユーザーから届いた修正提案を確認・承認・却下します。
             </p>
-
             <strong>
               未処理 {pendingCount}件 →
             </strong>
@@ -269,18 +285,12 @@ export default async function AdminPage() {
               textDecoration: "none",
             }}
           >
-            <h2
-              style={{
-                marginTop: 0,
-              }}
-            >
+            <h2 style={{ marginTop: 0 }}>
               変更履歴
             </h2>
-
             <p className="muted">
               大会情報の変更履歴を確認します。
             </p>
-
             <strong>
               履歴を見る →
             </strong>
@@ -294,18 +304,12 @@ export default async function AdminPage() {
               textDecoration: "none",
             }}
           >
-            <h2
-              style={{
-                marginTop: 0,
-              }}
-            >
+            <h2 style={{ marginTop: 0 }}>
               データ品質
             </h2>
-
             <p className="muted">
               大会情報の不足や確認が必要なデータを確認します。
             </p>
-
             <strong>
               確認する →
             </strong>
@@ -319,18 +323,12 @@ export default async function AdminPage() {
               textDecoration: "none",
             }}
           >
-            <h2
-              style={{
-                marginTop: 0,
-              }}
-            >
+            <h2 style={{ marginTop: 0 }}>
               情報源管理
             </h2>
-
             <p className="muted">
               大会に登録されている公式サイトやPDFなどを確認します。
             </p>
-
             <strong>
               情報源を見る →
             </strong>
