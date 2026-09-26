@@ -23,6 +23,11 @@ export function SearchForm({
   initialValues?: SearchValues;
 }) {
   const router = useRouter();
+  const hasAdvancedFilters = Boolean(
+    initialValues.gender ||
+      initialValues.eligibility ||
+      initialValues.status
+  );
 
   const submit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -176,7 +181,10 @@ export function SearchForm({
         初期設定：まだ申込可能な大会を表示
       </p>
 
-      <details className="advanced-filters">
+      <details
+        className="advanced-filters"
+        open={hasAdvancedFilters}
+      >
         <summary>詳細条件</summary>
 
         <div className="advanced-filter-grid">
