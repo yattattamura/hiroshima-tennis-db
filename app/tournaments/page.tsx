@@ -152,7 +152,7 @@ export default async function TournamentsPage({
   const level = params.level ?? "";
   const eligibility = params.eligibility ?? "";
   const keyword = params.keyword?.trim() ?? "";
-  const deadline = params.deadline ?? "";
+  const deadline = params.deadline ?? "open";
   const status = params.status ?? "";
   const currentPage = getPageNumber(params.page);
 
