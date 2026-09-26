@@ -7,7 +7,7 @@ export function Header() {
         <div className="container header-inner">
           <div className="header-top">
             <Link href="/" className="logo">
-              🎾 広島テニスDB
+              🎾 広島テニスポータル
             </Link>
 
             <div className="header-actions">
