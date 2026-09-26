@@ -15,7 +15,10 @@ type SearchParams = {
   keyword?: string;
   deadline?: string;
   status?: string;
+  page?: string;
 };
+
+const PAGE_SIZE = 20;
 
 function getJapanToday(): string {
   const parts = new Intl.DateTimeFormat("en-US", {
@@ -96,6 +99,45 @@ function getDeadlineLabel(deadline: string): string {
   }
 }
 
+function getPageNumber(value: string | undefined): number {
+  const parsed = Number(value ?? "1");
+
+  if (!Number.isInteger(parsed) || parsed < 1) {
+    return 1;
+  }
+
+  return parsed;
+}
+
+function buildPageHref(params: SearchParams, page: number): string {
+  const search = new URLSearchParams();
+
+  const entries: Array<[string, string | undefined]> = [
+    ["keyword", params.keyword],
+    ["period", params.period],
+    ["city", params.city],
+    ["eventType", params.eventType],
+    ["gender", params.gender],
+    ["level", params.level],
+    ["eligibility", params.eligibility],
+    ["deadline", params.deadline],
+    ["status", params.status],
+  ];
+
+  for (const [key, value] of entries) {
+    if (value) {
+      search.set(key, value);
+    }
+  }
+
+  if (page > 1) {
+    search.set("page", String(page));
+  }
+
+  const query = search.toString();
+  return query ? `/tournaments?${query}` : "/tournaments";
+}
+
 export default async function TournamentsPage({
   searchParams,
 }: {
@@ -112,13 +154,14 @@ export default async function TournamentsPage({
   const keyword = params.keyword?.trim() ?? "";
   const deadline = params.deadline ?? "";
   const status = params.status ?? "";
+  const currentPage = getPageNumber(params.page);
 
   const supabase = await createClient();
   const today = getJapanToday();
 
   let query = supabase
     .from("tournaments")
-    .select("*")
+    .select("*", { count: "exact" })
     .order("start_date", {
       ascending: true,
       nullsFirst: false,
@@ -159,7 +202,11 @@ export default async function TournamentsPage({
     query = query.eq("gender", gender);
   }
 
-  if (level) {
+  if (level === "CD") {
+    query = query.or("level.eq.CD,level.eq.C/D");
+  } else if (level === "AB") {
+    query = query.or("level.eq.AB,level.eq.A/B");
+  } else if (level) {
     query = query.eq("level", level);
   }
 
@@ -226,6 +273,10 @@ export default async function TournamentsPage({
     query = query.is("deadline_date", null);
   }
 
+  const from = (currentPage - 1) * PAGE_SIZE;
+  const to = from + PAGE_SIZE - 1;
+  query = query.range(from, to);
+
   const [tournamentResult, citiesResult] = await Promise.all([
     query,
     supabase
@@ -234,18 +285,15 @@ export default async function TournamentsPage({
       .not("city", "is", null),
   ]);
 
-  const { data, error } = tournamentResult;
+  const { data, error, count } = tournamentResult;
 
   if (error || citiesResult.error) {
     return (
       <div className="search-page">
         <div className="container">
-          <div
-            className="card"
-            style={{ padding: 24, marginTop: 20 }}
-          >
+          <div className="card" style={{ padding: 24, marginTop: 20 }}>
             <h1 style={{ marginTop: 0 }}>大会データを取得できませんでした</h1>
-            <p className="muted">Supabaseから大会情報を取得できませんでした。</p>
+            <p className="muted">大会情報の取得に失敗しました。</p>
             <p className="muted">
               {error?.message ?? citiesResult.error?.message ?? "データの取得に失敗しました。"}
             </p>
@@ -259,21 +307,25 @@ export default async function TournamentsPage({
   }
 
   const tournaments: Tournament[] = (data ?? []).map(convertTournament);
+  const totalCount = count ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+  const startItem = totalCount === 0 ? 0 : from + 1;
+  const endItem = Math.min(from + tournaments.length, totalCount);
 
   const cities = Array.from(
     new Set(
       (citiesResult.data ?? [])
         .map((row) => row.city)
         .filter(
-          (city): city is string =>
-            typeof city === "string" && city.trim().length > 0
+          (value): value is string =>
+            typeof value === "string" && value.trim().length > 0
         )
     )
   ).sort((a, b) => a.localeCompare(b, "ja"));
 
   const activeConditions: string[] = [];
 
-  if (keyword) activeConditions.push(`キーワード: ${keyword}`);
+  if (keyword) activeConditions.push(`「${keyword}」`);
   if (period !== "all") activeConditions.push(getPeriodLabel(period));
   if (city) activeConditions.push(city);
   if (eventType) activeConditions.push(eventType);
@@ -284,6 +336,26 @@ export default async function TournamentsPage({
   if (eligibility === "visitor") activeConditions.push("ビジターOK");
   if (deadline) activeConditions.push(getDeadlineLabel(deadline));
   if (status) activeConditions.push(status);
+
+  const visiblePages = Array.from(
+    { length: totalPages },
+    (_, index) => index + 1
+  ).filter(
+    (page) =>
+      totalPages <= 7 ||
+      page === 1 ||
+      page === totalPages ||
+      Math.abs(page - currentPage) <= 1
+  );
+
+  const paginationLinks: Array<number | "ellipsis"> = [];
+  for (const page of visiblePages) {
+    const previous = paginationLinks[paginationLinks.length - 1];
+    if (typeof previous === "number" && page - previous > 1) {
+      paginationLinks.push("ellipsis");
+    }
+    paginationLinks.push(page);
+  }
 
   return (
     <div className="search-page">
@@ -303,18 +375,15 @@ export default async function TournamentsPage({
           }}
         >
           <div>
-            <h1
-              className="section-title"
-              style={{ margin: 0 }}
-            >
+            <h1 className="section-title" style={{ margin: 0 }}>
               大会を探す
             </h1>
             <p className="muted" style={{ margin: "4px 0 0" }}>
-              {tournaments.length}件
+              {startItem}〜{endItem} / {totalCount}件
             </p>
           </div>
           <Link href="/" className="section-link">
-            ホームへ
+            ホーム
           </Link>
         </div>
 
@@ -338,7 +407,7 @@ export default async function TournamentsPage({
                 {condition}
               </span>
             ))}
-            <Link href="/tournaments" className="section-link">
+            <Link href={"/tournaments"} className="section-link">
               クリア
             </Link>
           </div>
@@ -351,14 +420,12 @@ export default async function TournamentsPage({
               alignItems: "center",
               justifyContent: "space-between",
               gap: 12,
-              marginBottom: 2,
+              marginBottom: 8,
             }}
           >
-            <h2 style={{ margin: 0, fontSize: 18 }}>
-              検索結果
-            </h2>
+            <h2 style={{ margin: 0, fontSize: 18 }}>検索結果</h2>
             <span className="muted" style={{ fontSize: 13 }}>
-              {tournaments.length}件
+              {startItem}〜{endItem} / {totalCount}件
             </span>
           </div>
 
@@ -370,10 +437,7 @@ export default async function TournamentsPage({
           ))}
 
           {tournaments.length === 0 && (
-            <div
-              className="card empty-card"
-              style={{ marginTop: 2 }}
-            >
+            <div className="card empty-card" style={{ marginTop: 2 }}>
               <div>
                 <strong>大会が見つかりません</strong>
                 <p className="muted" style={{ margin: "5px 0 0", fontSize: 13 }}>
@@ -384,6 +448,63 @@ export default async function TournamentsPage({
                 条件をクリア
               </Link>
             </div>
+          )}
+
+          {totalPages > 1 && (
+            <nav
+              aria-label="大会一覧のページ"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 6,
+                flexWrap: "wrap",
+                margin: "18px 0 8px",
+              }}
+            >
+              {currentPage > 1 && (
+                <Link
+                  href={buildPageHref(params, currentPage - 1)}
+                  className="outline-button"
+                  style={{ minHeight: "auto", padding: "7px 10px" }}
+                >
+                  ← 前へ
+                </Link>
+              )}
+
+              {paginationLinks.map((item, index) =>
+                item === "ellipsis" ? (
+                  <span key={`ellipsis-${index}`} className="muted" style={{ padding: "0 3px" }}>
+                    …
+                  </span>
+                ) : (
+                  <Link
+                    key={item}
+                    href={buildPageHref(params, item)}
+                    aria-current={item === currentPage ? "page" : undefined}
+                    className={item === currentPage ? "primary small" : "outline-button"}
+                    style={{
+                      minHeight: "auto",
+                      minWidth: 38,
+                      padding: "7px 9px",
+                      textAlign: "center",
+                    }}
+                  >
+                    {item}
+                  </Link>
+                )
+              )}
+
+              {currentPage < totalPages && (
+                <Link
+                  href={buildPageHref(params, currentPage + 1)}
+                  className="outline-button"
+                  style={{ minHeight: "auto", padding: "7px 10px" }}
+                >
+                  次へ →
+                </Link>
+              )}
+            </nav>
           )}
         </section>
       </div>
