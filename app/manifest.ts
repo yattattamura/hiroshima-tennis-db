@@ -10,7 +10,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: SITE_NAME,
 
     short_name:
-      "広島テニスDB",
+      "広島テニスポータル",
 
     description:
       SITE_DESCRIPTION,
