@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
 import { FavoriteButton } from "@/components/FavoriteButton";
+import { RecentViewTracker } from "@/components/RecentViewTracker";
 
 type Source = {
   id: string;
@@ -86,7 +87,6 @@ export default async function TournamentDetail({
       .select("*")
       .eq("id", id)
       .single(),
-
     supabase
       .from("event_sources")
       .select("id, source_type, url, checked_at, notes")
@@ -133,6 +133,20 @@ export default async function TournamentDetail({
     isUrl(applicationMethod);
 
   // ----------------------------------------
+  // 最近見た大会用データ
+  // ----------------------------------------
+
+  const recentViewData = {
+    id: tournament.id,
+    name: tournament.name ?? "",
+    date: tournament.date_text ?? "",
+    city: tournament.city ?? "",
+    venue: tournament.venue_name_raw ?? "",
+    eventType: tournament.event_type ?? "",
+    level: tournament.level ?? "",
+  };
+
+  // ----------------------------------------
   // 関連大会
   // ----------------------------------------
 
@@ -164,369 +178,504 @@ export default async function TournamentDetail({
   }
 
   return (
-    <main className="detail-page">
-      <div className="container">
-        <div className="breadcrumb">
-          <Link href="/">ホーム</Link>
+    <>
+      <RecentViewTracker
+        id={recentViewData.id}
+        name={recentViewData.name}
+        date={recentViewData.date}
+        city={recentViewData.city}
+        venue={recentViewData.venue}
+        eventType={recentViewData.eventType}
+        level={recentViewData.level}
+      />
 
-          <span aria-hidden="true">
-            ›
-          </span>
-
-          <Link href="/tournaments">
-            大会を探す
-          </Link>
-
-          <span aria-hidden="true">
-            ›
-          </span>
-
-          <span>
-            大会詳細
-          </span>
-        </div>
-
-        <article className="card detail-main">
-          <div className="detail-topline">
-            <div className="badges">
-              <span className="badge green">
-                {renderValue(
-                  tournament.status,
-                  "状況未設定"
-                )}
-              </span>
-
-              {tournament.level ? (
-                <span className="badge">
-                  {tournament.level}
-                </span>
-              ) : null}
-            </div>
-
-            <span className="detail-checked">
-              確認日{" "}
-              {formatDate(
-                tournament.last_checked_at
-              )}
+      <main className="detail-page">
+        <div className="container">
+          <div className="breadcrumb">
+            <Link href="/">ホーム</Link>
+            <span aria-hidden="true">›</span>
+            <Link href="/tournaments">
+              大会を探す
+            </Link>
+            <span aria-hidden="true">›</span>
+            <span>
+              大会詳細
             </span>
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              alignItems: "flex-start",
-              justifyContent: "space-between",
-              gap: 12,
-              flexWrap: "wrap",
-              marginBottom: 20,
-            }}
-          >
-            <h1
+          <article className="card detail-main">
+            <div className="detail-topline">
+              <div className="badges">
+                <span className="badge green">
+                  {renderValue(
+                    tournament.status,
+                    "状況未設定"
+                  )}
+                </span>
+
+                {tournament.level ? (
+                  <span className="badge">
+                    {tournament.level}
+                  </span>
+                ) : null}
+              </div>
+
+              <span className="detail-checked">
+                確認日{" "}
+                {formatDate(
+                  tournament.last_checked_at
+                )}
+              </span>
+            </div>
+
+            <div
               style={{
-                marginBottom: 0,
+                display: "flex",
+                alignItems: "flex-start",
+                justifyContent:
+                  "space-between",
+                gap: 12,
+                flexWrap: "wrap",
+                marginBottom: 20,
               }}
             >
-              {tournament.name}
-            </h1>
+              <h1
+                style={{
+                  marginBottom: 0,
+                }}
+              >
+                {tournament.name}
+              </h1>
 
-            <FavoriteButton
-              tournamentId={tournament.id}
-            />
-          </div>
-
-          <div className="detail-keyinfo">
-            <div className="detail-keyitem">
-              <span className="detail-keylabel">
-                開催日
-              </span>
-
-              <strong>
-                {renderValue(
-                  tournament.date_text
-                )}
-              </strong>
+              <FavoriteButton
+                tournamentId={
+                  tournament.id
+                }
+              />
             </div>
 
-            <div className="detail-keyitem">
-              <span className="detail-keylabel">
-                会場
-              </span>
+            <div className="detail-keyinfo">
+              <div className="detail-keyitem">
+                <span className="detail-keylabel">
+                  開催日
+                </span>
 
-              <strong>
-                {venue}
-              </strong>
+                <strong>
+                  {renderValue(
+                    tournament.date_text
+                  )}
+                </strong>
+              </div>
+
+              <div className="detail-keyitem">
+                <span className="detail-keylabel">
+                  会場
+                </span>
+
+                <strong>
+                  {venue}
+                </strong>
+              </div>
+
+              <div className="detail-keyitem">
+                <span className="detail-keylabel">
+                  種目
+                </span>
+
+                <strong>
+                  {renderValue(
+                    tournament.event_type
+                  )}
+                </strong>
+              </div>
+
+              <div className="detail-keyitem">
+                <span className="detail-keylabel">
+                  参加費
+                </span>
+
+                <strong>
+                  {renderValue(
+                    tournament.fee_text
+                  )}
+                </strong>
+              </div>
+
+              <div className="detail-keyitem detail-keyitem-emphasis">
+                <span className="detail-keylabel">
+                  申込締切
+                </span>
+
+                <strong>
+                  {renderValue(
+                    tournament.deadline_text,
+                    "要項を確認"
+                  )}
+                </strong>
+              </div>
             </div>
 
-            <div className="detail-keyitem">
-              <span className="detail-keylabel">
-                種目
-              </span>
+            {qualificationTags.length > 0 ? (
+              <section className="detail-section">
+                <h2>
+                  参加資格
+                </h2>
 
-              <strong>
-                {renderValue(
-                  tournament.event_type
-                )}
-              </strong>
+                <div className="detail-tags">
+                  {qualificationTags.map(
+                    (tag) => (
+                      <span
+                        key={tag}
+                        className="badge green"
+                      >
+                        ✓ {tag}
+                      </span>
+                    )
+                  )}
+                </div>
+              </section>
+            ) : tournament.eligibility ? (
+              <section className="detail-section">
+                <h2>
+                  参加資格
+                </h2>
+
+                <p className="detail-text">
+                  {tournament.eligibility}
+                </p>
+              </section>
+            ) : null}
+
+            <div className="detail-actions">
+              {hasOfficialUrl ? (
+                <a
+                  className="primary"
+                  href={officialUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  公式情報を見る ↗
+                </a>
+              ) : null}
+
+              <Link
+                className="outline-button"
+                href={`/tournaments/${tournament.id}/suggest`}
+              >
+                情報を修正する
+              </Link>
             </div>
 
-            <div className="detail-keyitem">
-              <span className="detail-keylabel">
-                参加費
-              </span>
+            <div className="detail-mobile-actions">
+              {hasOfficialUrl ? (
+                <a
+                  className="primary"
+                  href={officialUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  公式情報 ↗
+                </a>
+              ) : null}
 
-              <strong>
-                {renderValue(
-                  tournament.fee_text
-                )}
-              </strong>
+              <Link
+                className="outline-button"
+                href={`/tournaments/${tournament.id}/suggest`}
+              >
+                修正する
+              </Link>
             </div>
 
-            <div className="detail-keyitem detail-keyitem-emphasis">
-              <span className="detail-keylabel">
-                申込締切
-              </span>
-
-              <strong>
-                {renderValue(
-                  tournament.deadline_text,
-                  "要項を確認"
-                )}
-              </strong>
-            </div>
-          </div>
-
-          {qualificationTags.length > 0 ? (
             <section className="detail-section">
               <h2>
-                参加資格
+                大会情報
               </h2>
 
-              <div className="detail-tags">
-                {qualificationTags.map(
-                  (tag) => (
-                    <span
-                      key={tag}
-                      className="badge green"
+              <div className="info-table">
+                <div>
+                  主催者
+                </div>
+
+                <div>
+                  {tournament.organizer_id ? (
+                    <Link
+                      className="text-link"
+                      href={`/organizers/${tournament.organizer_id}`}
                     >
-                      ✓ {tag}
-                    </span>
-                  )
-                )}
+                      {renderValue(
+                        tournament.organizer_name_raw
+                      )}
+                    </Link>
+                  ) : (
+                    renderValue(
+                      tournament.organizer_name_raw
+                    )
+                  )}
+                </div>
+
+                <div>
+                  開催日
+                </div>
+
+                <div>
+                  {renderValue(
+                    tournament.date_text
+                  )}
+                </div>
+
+                <div>
+                  備考
+                </div>
+
+                <div>
+                  {renderValue(
+                    tournament.notes,
+                    "記載なし"
+                  )}
+                </div>
+
+                <div>
+                  会場
+                </div>
+
+                <div>
+                  {venue}
+                </div>
+
+                <div>
+                  種目
+                </div>
+
+                <div>
+                  {renderValue(
+                    tournament.event_type
+                  )}
+                </div>
+
+                <div>
+                  性別
+                </div>
+
+                <div>
+                  {renderValue(
+                    tournament.gender,
+                    "指定なし"
+                  )}
+                </div>
+
+                <div>
+                  クラス
+                </div>
+
+                <div>
+                  {renderValue(
+                    tournament.level
+                  )}
+                </div>
+
+                <div>
+                  参加資格
+                </div>
+
+                <div>
+                  {renderValue(
+                    tournament.eligibility
+                  )}
+                </div>
+
+                <div>
+                  参加費
+                </div>
+
+                <div>
+                  {renderValue(
+                    tournament.fee_text
+                  )}
+                </div>
+
+                <div>
+                  申込締切
+                </div>
+
+                <div>
+                  {renderValue(
+                    tournament.deadline_text,
+                    "要項を確認"
+                  )}
+                </div>
+
+                <div>
+                  申込方法
+                </div>
+
+                <div>
+                  {hasApplicationUrl ? (
+                    <a
+                      className="text-link"
+                      href={
+                        applicationMethod
+                      }
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      申込ページを開く ↗
+                    </a>
+                  ) : (
+                    renderValue(
+                      applicationMethod
+                    )
+                  )}
+                </div>
               </div>
             </section>
-          ) : tournament.eligibility ? (
-            <section className="detail-section">
-              <h2>
-                参加資格
-              </h2>
 
-              <p className="detail-text">
-                {tournament.eligibility}
-              </p>
-            </section>
-          ) : null}
+            {tournament.data_quality_note ? (
+              <section className="notice detail-quality-note">
+                <strong>
+                  確認メモ
+                </strong>
 
-          <div className="detail-actions">
-            {hasOfficialUrl ? (
-              <a
-                className="primary"
-                href={officialUrl}
-                target="_blank"
-                rel="noreferrer"
-              >
-                公式情報を見る ↗
-              </a>
+                <p>
+                  {
+                    tournament.data_quality_note
+                  }
+                </p>
+              </section>
             ) : null}
+          </article>
 
-            <Link
-              className="outline-button"
-              href={`/tournaments/${tournament.id}/suggest`}
+          {/* -------------------------------- */}
+          {/* 関連する大会 */}
+          {/* -------------------------------- */}
+
+          {relatedTournaments.length > 0 ? (
+            <section
+              className="detail-source-card card"
+              style={{
+                marginTop: 16,
+              }}
             >
-              情報を修正する
-            </Link>
-          </div>
+              <div className="section-heading">
+                <div>
+                  <h2>
+                    この主催者の今後の大会
+                  </h2>
 
-          <div className="detail-mobile-actions">
-            {hasOfficialUrl ? (
-              <a
-                className="primary"
-                href={officialUrl}
-                target="_blank"
-                rel="noreferrer"
-              >
-                公式情報 ↗
-              </a>
-            ) : null}
+                  <p className="muted">
+                    同じ主催者が開催する大会です。
+                  </p>
+                </div>
 
-            <Link
-              className="outline-button"
-              href={`/tournaments/${tournament.id}/suggest`}
-            >
-              修正する
-            </Link>
-          </div>
-
-          <section className="detail-section">
-            <h2>
-              大会情報
-            </h2>
-
-            <div className="info-table">
-              <div>
-                主催者
-              </div>
-
-              <div>
                 {tournament.organizer_id ? (
                   <Link
-                    className="text-link"
                     href={`/organizers/${tournament.organizer_id}`}
+                    className="outline-button"
                   >
-                    {renderValue(
-                      tournament.organizer_name_raw
-                    )}
+                    すべて見る
                   </Link>
-                ) : (
-                  renderValue(
-                    tournament.organizer_name_raw
+                ) : null}
+              </div>
+
+              <div
+                style={{
+                  display: "grid",
+                  gap: 10,
+                  marginTop: 14,
+                }}
+              >
+                {relatedTournaments.map(
+                  (related) => (
+                    <Link
+                      key={related.id}
+                      href={`/tournaments/${related.id}`}
+                      className="card"
+                      style={{
+                        display: "block",
+                        padding: 16,
+                        textDecoration:
+                          "none",
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent:
+                            "space-between",
+                          alignItems:
+                            "flex-start",
+                          gap: 12,
+                        }}
+                      >
+                        <div
+                          style={{
+                            minWidth: 0,
+                          }}
+                        >
+                          <strong
+                            style={{
+                              display:
+                                "block",
+                              lineHeight:
+                                1.5,
+                            }}
+                          >
+                            {related.name}
+                          </strong>
+
+                          <div
+                            className="muted"
+                            style={{
+                              marginTop: 6,
+                            }}
+                          >
+                            {renderValue(
+                              related.date_text
+                            )}
+
+                            {related.venue_name_raw
+                              ? ` ・ ${related.venue_name_raw}`
+                              : ""}
+                          </div>
+
+                          <div
+                            className="muted"
+                            style={{
+                              marginTop: 3,
+                            }}
+                          >
+                            {renderValue(
+                              related.event_type,
+                              "種目未設定"
+                            )}
+
+                            {related.level
+                              ? ` ・ ${related.level}`
+                              : ""}
+                          </div>
+                        </div>
+
+                        {related.status ? (
+                          <span
+                            className="badge green"
+                            style={{
+                              flexShrink: 0,
+                            }}
+                          >
+                            {related.status}
+                          </span>
+                        ) : null}
+                      </div>
+                    </Link>
                   )
                 )}
               </div>
-
-              <div>
-                開催日
-              </div>
-
-              <div>
-                {renderValue(
-                  tournament.date_text
-                )}
-              </div>
-
-              <div>
-                備考
-              </div>
-
-              <div>
-                {renderValue(
-                  tournament.notes,
-                  "記載なし"
-                )}
-              </div>
-
-              <div>
-                会場
-              </div>
-
-              <div>
-                {venue}
-              </div>
-
-              <div>
-                種目
-              </div>
-
-              <div>
-                {renderValue(
-                  tournament.event_type
-                )}
-              </div>
-
-              <div>
-                性別
-              </div>
-
-              <div>
-                {renderValue(
-                  tournament.gender,
-                  "指定なし"
-                )}
-              </div>
-
-              <div>
-                クラス
-              </div>
-
-              <div>
-                {renderValue(
-                  tournament.level
-                )}
-              </div>
-
-              <div>
-                参加資格
-              </div>
-
-              <div>
-                {renderValue(
-                  tournament.eligibility
-                )}
-              </div>
-
-              <div>
-                参加費
-              </div>
-
-              <div>
-                {renderValue(
-                  tournament.fee_text
-                )}
-              </div>
-
-              <div>
-                申込締切
-              </div>
-
-              <div>
-                {renderValue(
-                  tournament.deadline_text,
-                  "要項を確認"
-                )}
-              </div>
-
-              <div>
-                申込方法
-              </div>
-
-              <div>
-                {hasApplicationUrl ? (
-                  <a
-                    className="text-link"
-                    href={
-                      applicationMethod
-                    }
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    申込ページを開く ↗
-                  </a>
-                ) : (
-                  renderValue(
-                    applicationMethod
-                  )
-                )}
-              </div>
-            </div>
-          </section>
-
-          {tournament.data_quality_note ? (
-            <section className="notice detail-quality-note">
-              <strong>
-                確認メモ
-              </strong>
-
-              <p>
-                {tournament.data_quality_note}
-              </p>
             </section>
           ) : null}
-        </article>
 
-        {/* -------------------------------- */}
-        {/* 関連する大会 */}
-        {/* -------------------------------- */}
+          {/* -------------------------------- */}
+          {/* 情報源 */}
+          {/* -------------------------------- */}
 
-        {relatedTournaments.length > 0 ? (
           <section
             className="detail-source-card card"
             style={{
@@ -536,221 +685,96 @@ export default async function TournamentDetail({
             <div className="section-heading">
               <div>
                 <h2>
-                  この主催者の今後の大会
+                  情報源
                 </h2>
 
                 <p className="muted">
-                  同じ主催者が開催する大会です。
+                  公式情報を確認できるリンクです。
                 </p>
               </div>
+            </div>
 
-              {tournament.organizer_id ? (
-                <Link
-                  href={`/organizers/${tournament.organizer_id}`}
-                  className="outline-button"
+            {hasOfficialUrl ? (
+              <div className="source-row">
+                <span className="badge">
+                  公式
+                </span>
+
+                <a
+                  className="text-link source-url"
+                  href={officialUrl}
+                  target="_blank"
+                  rel="noreferrer"
                 >
-                  すべて見る
-                </Link>
-              ) : null}
-            </div>
+                  {officialUrl}
+                </a>
 
-            <div
-              style={{
-                display: "grid",
-                gap: 10,
-                marginTop: 14,
-              }}
-            >
-              {relatedTournaments.map(
-                (related) => (
-                  <Link
-                    key={related.id}
-                    href={`/tournaments/${related.id}`}
-                    className="card"
-                    style={{
-                      display: "block",
-                      padding: 16,
-                      textDecoration: "none",
-                    }}
-                  >
+                <span className="muted">
+                  {formatDate(
+                    tournament.last_checked_at
+                  )}
+                </span>
+              </div>
+            ) : null}
+
+            {sources.length > 0 ? (
+              <div className="source-list">
+                {sources.map(
+                  (source) => (
                     <div
-                      style={{
-                        display: "flex",
-                        justifyContent:
-                          "space-between",
-                        alignItems:
-                          "flex-start",
-                        gap: 12,
-                      }}
+                      key={source.id}
+                      className="source-row"
                     >
-                      <div
-                        style={{
-                          minWidth: 0,
-                        }}
-                      >
-                        <strong
-                          style={{
-                            display:
-                              "block",
-                            lineHeight:
-                              1.5,
-                          }}
-                        >
-                          {related.name}
-                        </strong>
-
-                        <div
-                          className="muted"
-                          style={{
-                            marginTop: 6,
-                          }}
-                        >
-                          {renderValue(
-                            related.date_text
-                          )}
-
-                          {related.venue_name_raw
-                            ? ` ・ ${related.venue_name_raw}`
-                            : ""}
-                        </div>
-
-                        <div
-                          className="muted"
-                          style={{
-                            marginTop: 3,
-                          }}
-                        >
-                          {renderValue(
-                            related.event_type,
-                            "種目未設定"
-                          )}
-
-                          {related.level
-                            ? ` ・ ${related.level}`
-                            : ""}
-                        </div>
-                      </div>
-
-                      {related.status ? (
-                        <span
-                          className="badge green"
-                          style={{
-                            flexShrink: 0,
-                          }}
-                        >
-                          {related.status}
-                        </span>
-                      ) : null}
-                    </div>
-                  </Link>
-                )
-              )}
-            </div>
-          </section>
-        ) : null}
-
-        {/* -------------------------------- */}
-        {/* 情報源 */}
-        {/* -------------------------------- */}
-
-        <section
-          className="detail-source-card card"
-          style={{
-            marginTop: 16,
-          }}
-        >
-          <div className="section-heading">
-            <div>
-              <h2>
-                情報源
-              </h2>
-
-              <p className="muted">
-                公式情報を確認できるリンクです。
-              </p>
-            </div>
-          </div>
-
-          {hasOfficialUrl ? (
-            <div className="source-row">
-              <span className="badge">
-                公式
-              </span>
-
-              <a
-                className="text-link source-url"
-                href={officialUrl}
-                target="_blank"
-                rel="noreferrer"
-              >
-                {officialUrl}
-              </a>
-
-              <span className="muted">
-                {formatDate(
-                  tournament.last_checked_at
-                )}
-              </span>
-            </div>
-          ) : null}
-
-          {sources.length > 0 ? (
-            <div className="source-list">
-              {sources.map(
-                (source) => (
-                  <div
-                    key={source.id}
-                    className="source-row"
-                  >
-                    <span className="badge">
-                      {
-                        source.source_type
-                      }
-                    </span>
-
-                    {isUrl(
-                      source.url
-                    ) ? (
-                      <a
-                        className="text-link source-url"
-                        href={
-                          source.url ??
-                          "#"
-                        }
-                        target="_blank"
-                        rel="noreferrer"
-                      >
+                      <span className="badge">
                         {
-                          source.url
+                          source.source_type
                         }
-                      </a>
-                    ) : (
-                      <span className="source-url">
-                        {renderValue(
-                          source.url
+                      </span>
+
+                      {isUrl(
+                        source.url
+                      ) ? (
+                        <a
+                          className="text-link source-url"
+                          href={
+                            source.url ??
+                            "#"
+                          }
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          {
+                            source.url
+                          }
+                        </a>
+                      ) : (
+                        <span className="source-url">
+                          {renderValue(
+                            source.url
+                          )}
+                        </span>
+                      )}
+
+                      <span className="muted">
+                        {formatDate(
+                          source.checked_at
                         )}
                       </span>
-                    )}
+                    </div>
+                  )
+                )}
+              </div>
+            ) : null}
 
-                    <span className="muted">
-                      {formatDate(
-                        source.checked_at
-                      )}
-                    </span>
-                  </div>
-                )
-              )}
-            </div>
-          ) : null}
-
-          {!hasOfficialUrl &&
-          sources.length === 0 ? (
-            <p className="muted">
-              情報源は未登録です。
-            </p>
-          ) : null}
-        </section>
-      </div>
-    </main>
+            {!hasOfficialUrl &&
+            sources.length === 0 ? (
+              <p className="muted">
+                情報源は未登録です。
+              </p>
+            ) : null}
+          </section>
+        </div>
+      </main>
+    </>
   );
 }
