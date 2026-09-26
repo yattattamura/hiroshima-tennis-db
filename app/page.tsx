@@ -149,7 +149,7 @@ export default async function Home() {
               marginTop: 32,
             }}
           >
-            <h1>広島テニスDB</h1>
+            <h1>広島テニスポータル</h1>
             <p>大会データを取得できませんでした。</p>
             <p className="muted">{errorMessage}</p>
           </div>
