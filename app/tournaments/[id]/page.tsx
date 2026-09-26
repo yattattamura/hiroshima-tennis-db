@@ -3,66 +3,46 @@ import { notFound } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
 
-type EventSource = {
+type Source = {
   id: string;
-  tournament_id: string;
   source_type: string;
   url: string | null;
   checked_at: string | null;
   notes: string | null;
-  created_at: string;
 };
 
-function sourceTypeLabel(
-  sourceType: string
-): string {
-  switch (sourceType) {
-    case "official":
-      return "公式サイト";
-
-    case "pdf":
-      return "大会要項・PDF";
-
-    case "application":
-      return "申込ページ";
-
-    case "organizer":
-      return "主催者情報";
-
-    default:
-      return sourceType || "情報源";
-  }
+function isUrl(value: string | null | undefined): boolean {
+  return Boolean(value && /^https?:\/\//i.test(value));
 }
 
-function isHttpUrl(
-  value: string | null | undefined
-): boolean {
-  if (!value) {
-    return false;
-  }
-
-  return (
-    value.startsWith("https://") ||
-    value.startsWith("http://")
-  );
-}
-
-function formatDate(
-  value: string | null | undefined
-): string {
+function formatDate(value: string | null | undefined): string {
   if (!value) {
     return "未設定";
   }
 
-  const date = new Date(value);
+  return new Date(value).toLocaleDateString("ja-JP");
+}
 
-  if (Number.isNaN(date.getTime())) {
-    return "未設定";
+function renderValue(value: string | null | undefined, fallback = "未設定") {
+  return value?.trim() ? value : fallback;
+}
+
+function getQualificationTags(tournament: any): string[] {
+  const tags: string[] = [];
+
+  if (tournament.external_allowed === "可") {
+    tags.push("非会員OK");
   }
 
-  return date.toLocaleDateString("ja-JP", {
-    timeZone: "Asia/Tokyo",
-  });
+  if (tournament.other_city_allowed === "可") {
+    tags.push("他市協会員OK");
+  }
+
+  if (tournament.eligibility_category === "ビジター参加可") {
+    tags.push("ビジターOK");
+  }
+
+  return tags;
 }
 
 export default async function TournamentDetail({
@@ -71,633 +51,244 @@ export default async function TournamentDetail({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-
   const supabase = await createClient();
 
-  // --------------------------------------------------
-  // 大会情報取得
-  // --------------------------------------------------
-
-  const { data: tournament, error: tournamentError } =
-    await supabase
+  const [tournamentResult, sourcesResult] = await Promise.all([
+    supabase
       .from("tournaments")
       .select("*")
       .eq("id", id)
-      .single();
+      .single(),
+    supabase
+      .from("event_sources")
+      .select("id, source_type, url, checked_at, notes")
+      .eq("tournament_id", id)
+      .order("checked_at", { ascending: false, nullsFirst: false }),
+  ]);
 
-  if (
-    tournamentError ||
-    !tournament
-  ) {
+  const { data: tournament, error: tournamentError } = tournamentResult;
+  const sources: Source[] = (sourcesResult.data ?? []) as Source[];
+
+  if (tournamentError || !tournament) {
     notFound();
   }
 
-  // --------------------------------------------------
-  // 情報源取得
-  // --------------------------------------------------
+  const qualificationTags = getQualificationTags(tournament);
+  const venue = tournament.venue_name_raw
+    ? `${tournament.city ?? ""}・${tournament.venue_name_raw}`
+    : renderValue(tournament.city);
 
-  const { data: eventSources, error: sourceError } =
-    await supabase
-      .from("event_sources")
-      .select("*")
-      .eq("tournament_id", id)
-      .order("created_at", {
-        ascending: true,
-      });
-
-  const sources: EventSource[] =
-    sourceError || !eventSources
-      ? []
-      : eventSources;
-
-  // --------------------------------------------------
-  // 基本情報
-  // --------------------------------------------------
-
-  const venueText = [
-    tournament.city ?? "",
-    tournament.venue_name_raw ?? "",
-  ]
-    .filter(Boolean)
-    .join("・");
-
-  const rows: Array<[string, string]> = [
-    [
-      "主催者",
-      tournament.organizer_name_raw ??
-        "未設定",
-    ],
-    [
-      "開催日",
-      tournament.date_text ??
-        "未設定",
-    ],
-    [
-      "会場",
-      venueText ||
-        "未設定",
-    ],
-    [
-      "種目",
-      tournament.event_type ??
-        "未設定",
-    ],
-    [
-      "性別",
-      tournament.gender ??
-        "未設定",
-    ],
-    [
-      "クラス",
-      tournament.level ??
-        "未設定",
-    ],
-    [
-      "参加資格",
-      tournament.eligibility ??
-        "未設定",
-    ],
-    [
-      "参加費",
-      tournament.fee_text ??
-        "要項をご確認ください",
-    ],
-    [
-      "申込締切",
-      tournament.deadline_text ??
-        "要項をご確認ください",
-    ],
-    [
-      "申込方法",
-      tournament.application_method ??
-        "公式サイトをご確認ください",
-    ],
-  ];
-
-  // --------------------------------------------------
-  // 参加資格の整理
-  // --------------------------------------------------
-
-  const qualificationMessages: string[] = [];
-
-  if (
-    tournament.external_allowed === "可"
-  ) {
-    qualificationMessages.push(
-      "非会員でも参加可能"
-    );
-  }
-
-  if (
-    tournament.other_city_allowed === "可"
-  ) {
-    qualificationMessages.push(
-      "他市協会員も参加可能"
-    );
-  }
-
-  if (
-    tournament.eligibility_category ===
-    "ビジター参加可"
-  ) {
-    qualificationMessages.push(
-      "ビジター参加可能"
-    );
-  }
-
-  if (
-    tournament.age_condition
-  ) {
-    qualificationMessages.push(
-      tournament.age_condition
-    );
-  }
-
-  // --------------------------------------------------
-  // 公式URL
-  // --------------------------------------------------
-
-  const officialUrl =
-    tournament.official_url ?? "";
-
-  // --------------------------------------------------
-  // 情報源数
-  // --------------------------------------------------
-
-  const sourceCount =
-    sources.length +
-    (officialUrl &&
-    !sources.some(
-      (source) =>
-        source.url === officialUrl
-    )
-      ? 1
-      : 0);
-
-  // --------------------------------------------------
-  // 表示
-  // --------------------------------------------------
+  const officialUrl = renderValue(tournament.official_url, "");
+  const applicationMethod = renderValue(tournament.application_method, "");
+  const hasOfficialUrl = isUrl(officialUrl);
+  const hasApplicationUrl = isUrl(applicationMethod);
 
   return (
-    <div className="detail-page">
+    <main className="detail-page">
       <div className="container">
-
-        {/* パンくず */}
         <div className="breadcrumb">
-          <Link href="/">
-            ホーム
-          </Link>
-
-          {" → "}
-
-          <Link href="/tournaments">
-            大会を探す
-          </Link>
-
-          {" → "}
-
-          <span>
-            大会詳細
-          </span>
+          <Link href="/">ホーム</Link>
+          <span aria-hidden="true">›</span>
+          <Link href="/tournaments">大会を探す</Link>
+          <span aria-hidden="true">›</span>
+          <span>大会詳細</span>
         </div>
 
-        <div className="detail-grid">
-
-          {/* ====================================== */}
-          {/* メイン */}
-          {/* ====================================== */}
-
-          <article className="card detail-main">
-
-            {/* ステータス */}
+        <article className="card detail-main">
+          <div className="detail-topline">
             <div className="badges">
               <span className="badge green">
-                {tournament.status ??
-                  "状況未設定"}
+                {renderValue(tournament.status, "状況未設定")}
               </span>
-
-              {tournament.level && (
-                <span className="badge">
-                  {tournament.level}
-                </span>
-              )}
-
-              {tournament.event_type && (
-                <span className="badge">
-                  {tournament.event_type}
-                </span>
-              )}
+              {tournament.level ? (
+                <span className="badge">{tournament.level}</span>
+              ) : null}
             </div>
 
-            {/* 大会名 */}
-            <h1>
-              {tournament.name}
-            </h1>
+            <span className="detail-checked">
+              確認日 {formatDate(tournament.last_checked_at)}
+            </span>
+          </div>
 
-            {/* 基本情報 */}
-            <div className="info-table">
-              {rows.map(
-                ([label, value]) => (
-                  <div
-                    key={label}
-                    style={{
-                      display: "contents",
-                    }}
-                  >
-                    <div>
-                      {label}
-                    </div>
+          <h1>{tournament.name}</h1>
 
-                    <div>
-                      <span
-                        style={{
-                          whiteSpace:
-                            "pre-wrap",
-                        }}
-                      >
-                        {value}
-                      </span>
-                    </div>
-                  </div>
-                )
-              )}
+          <div className="detail-keyinfo">
+            <div className="detail-keyitem">
+              <span className="detail-keylabel">開催日</span>
+              <strong>{renderValue(tournament.date_text)}</strong>
             </div>
 
-            {/* 参加資格の整理 */}
-            {qualificationMessages.length >
-              0 && (
-              <div
-                className="notice"
-                style={{
-                  marginTop: 24,
-                }}
-              >
-                <strong>
-                  参加資格について
-                </strong>
+            <div className="detail-keyitem">
+              <span className="detail-keylabel">会場</span>
+              <strong>{venue}</strong>
+            </div>
 
-                <div
-                  style={{
-                    display: "grid",
-                    gap: 6,
-                    marginTop: 10,
-                  }}
-                >
-                  {qualificationMessages.map(
-                    (message) => (
-                      <p
-                        key={message}
-                        style={{
-                          margin: 0,
-                        }}
-                      >
-                        ✓ {message}
-                      </p>
-                    )
-                  )}
-                </div>
+            <div className="detail-keyitem">
+              <span className="detail-keylabel">種目</span>
+              <strong>{renderValue(tournament.event_type)}</strong>
+            </div>
+
+            <div className="detail-keyitem">
+              <span className="detail-keylabel">参加費</span>
+              <strong>{renderValue(tournament.fee_text)}</strong>
+            </div>
+
+            <div className="detail-keyitem detail-keyitem-emphasis">
+              <span className="detail-keylabel">申込締切</span>
+              <strong>{renderValue(tournament.deadline_text, "要項を確認")}</strong>
+            </div>
+          </div>
+
+          {qualificationTags.length > 0 ? (
+            <section className="detail-section">
+              <h2>参加資格</h2>
+              <div className="detail-tags">
+                {qualificationTags.map((tag) => (
+                  <span key={tag} className="badge green">
+                    ✓ {tag}
+                  </span>
+                ))}
               </div>
-            )}
-
-            {/* データ品質メモ */}
-            {tournament.data_quality_note && (
-              <div
-                className="notice"
-                style={{
-                  marginTop: 24,
-                }}
-              >
-                <strong>
-                  情報についての注意
-                </strong>
-
-                <p
-                  style={{
-                    marginBottom: 0,
-                    whiteSpace:
-                      "pre-wrap",
-                  }}
-                >
-                  {tournament.data_quality_note}
-                </p>
-              </div>
-            )}
-
-            {/* ---------------------------------- */}
-            {/* 情報源 */}
-            {/* ---------------------------------- */}
-
-            <section
-              style={{
-                marginTop: 32,
-              }}
-            >
-              <h2>
-                情報源
-              </h2>
-
-              <p className="muted">
-                この大会情報を確認するために登録している情報源です。
-              </p>
-
-              {officialUrl && (
-                <div
-                  className="card"
-                  style={{
-                    padding: 20,
-                    marginTop: 16,
-                  }}
-                >
-                  <div className="badges">
-                    <span className="badge">
-                      公式情報
-                    </span>
-                  </div>
-
-                  <h3
-                    style={{
-                      marginTop: 10,
-                    }}
-                  >
-                    公式情報
-                  </h3>
-
-                  {isHttpUrl(
-                    officialUrl
-                  ) ? (
-                    <a
-                      href={officialUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        wordBreak:
-                          "break-all",
-                      }}
-                    >
-                      {officialUrl}
-                    </a>
-                  ) : (
-                    <p
-                      className="muted"
-                      style={{
-                        marginBottom: 0,
-                      }}
-                    >
-                      {officialUrl}
-                    </p>
-                  )}
-                </div>
-              )}
-
-              {sources.length > 0 ? (
-                <div
-                  style={{
-                    display: "grid",
-                    gap: 12,
-                    marginTop: 12,
-                  }}
-                >
-                  {sources.map(
-                    (source) => (
-                      <div
-                        key={source.id}
-                        className="card"
-                        style={{
-                          padding: 20,
-                        }}
-                      >
-                        <div className="badges">
-                          <span className="badge">
-                            {sourceTypeLabel(
-                              source.source_type
-                            )}
-                          </span>
-                        </div>
-
-                        {source.url ? (
-                          <div
-                            style={{
-                              marginTop: 10,
-                            }}
-                          >
-                            {isHttpUrl(
-                              source.url
-                            ) ? (
-                              <a
-                                href={
-                                  source.url
-                                }
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                style={{
-                                  wordBreak:
-                                    "break-all",
-                                }}
-                              >
-                                {
-                                  source.url
-                                }
-                              </a>
-                            ) : (
-                              <p
-                                className="muted"
-                                style={{
-                                  marginBottom: 0,
-                                }}
-                              >
-                                {
-                                  source.url
-                                }
-                              </p>
-                            )}
-                          </div>
-                        ) : (
-                          <p
-                            className="muted"
-                            style={{
-                              marginTop: 10,
-                              marginBottom: 0,
-                            }}
-                          >
-                            URL未登録
-                          </p>
-                        )}
-
-                        {source.notes && (
-                          <p
-                            className="muted"
-                            style={{
-                              marginTop: 10,
-                              marginBottom: 0,
-                              whiteSpace:
-                                "pre-wrap",
-                            }}
-                          >
-                            {source.notes}
-                          </p>
-                        )}
-
-                        <p
-                          className="muted"
-                          style={{
-                            marginTop: 10,
-                            marginBottom: 0,
-                          }}
-                        >
-                          確認日：
-                          {formatDate(
-                            source.checked_at
-                          )}
-                        </p>
-                      </div>
-                    )
-                  )}
-                </div>
-              ) : (
-                <div
-                  className="card"
-                  style={{
-                    padding: 20,
-                    marginTop: 16,
-                  }}
-                >
-                  <p
-                    className="muted"
-                    style={{
-                      margin: 0,
-                    }}
-                  >
-                    個別の情報源はまだ登録されていません。
-                  </p>
-                </div>
-              )}
             </section>
+          ) : tournament.eligibility ? (
+            <section className="detail-section">
+              <h2>参加資格</h2>
+              <p className="detail-text">{tournament.eligibility}</p>
+            </section>
+          ) : null}
 
-            {/* ---------------------------------- */}
-            {/* 最終確認 */}
-            {/* ---------------------------------- */}
-
-            <div
-              className="notice"
-              style={{
-                marginTop: 24,
-              }}
-            >
-              <strong>
-                情報の更新状況
-              </strong>
-
-              <p
-                style={{
-                  marginTop: 10,
-                  marginBottom: 6,
-                }}
+          <div className="detail-actions">
+            {hasOfficialUrl ? (
+              <a
+                className="primary"
+                href={officialUrl}
+                target="_blank"
+                rel="noreferrer"
               >
-                最終確認日：
-                {formatDate(
-                  tournament.last_checked_at
-                )}
-              </p>
-
-              <p
-                className="muted"
-                style={{
-                  margin: 0,
-                }}
-              >
-                登録情報 {sourceCount}件の情報源を確認できます。
-              </p>
-            </div>
-
-            {/* ---------------------------------- */}
-            {/* アクション */}
-            {/* ---------------------------------- */}
-
-            <div
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: 10,
-                marginTop: 28,
-              }}
-            >
-              <Link
-                href={`/tournaments/${id}/suggest`}
-                className="outline-button"
-              >
-                この情報を修正
-              </Link>
-
-              <Link
-                href="/tournaments"
-                className="outline-button"
-              >
-                大会一覧へ戻る
-              </Link>
-            </div>
-          </article>
-
-          {/* ====================================== */}
-          {/* サイドバー */}
-          {/* ====================================== */}
-
-          <aside
-            className="card detail-side"
-          >
-            <h3>
-              情報の信頼性
-            </h3>
-
-            <p>
-              ✓ 大会情報をデータベースで管理
-            </p>
-
-            <p>
-              ✓ 情報源を記録
-            </p>
-
-            <p>
-              ✓ 最終確認日を記録
-            </p>
-
-            <p>
-              ✓ ユーザーから修正提案可能
-            </p>
-
-            <hr />
-
-            <h3>
-              情報源
-            </h3>
-
-            <p>
-              {sourceCount}件
-            </p>
-
-            <p className="muted">
-              公式情報や大会要項など、
-              登録されている情報源を確認できます。
-            </p>
-
-            <hr />
-
-            <h3>
-              情報に誤りがある場合
-            </h3>
-
-            <p className="muted">
-              開催日、会場、参加費、締切などに変更や誤りがある場合は、修正提案からお知らせください。
-            </p>
+                公式情報を見る ↗
+              </a>
+            ) : null}
 
             <Link
-              href={`/tournaments/${id}/suggest`}
               className="outline-button"
+              href={`/tournaments/${tournament.id}/suggest`}
             >
-              修正を提案する
+              情報を修正する
             </Link>
-          </aside>
-        </div>
+          </div>
+
+          <section className="detail-section">
+            <h2>大会情報</h2>
+            <div className="info-table">
+              <div>主催者</div>
+              <div>{renderValue(tournament.organizer_name_raw)}</div>
+
+              <div>開催日</div>
+              <div>{renderValue(tournament.date_text)}</div>
+
+              <div>備考</div>
+              <div>{renderValue(tournament.notes, "記載なし")}</div>
+
+              <div>会場</div>
+              <div>{venue}</div>
+
+              <div>種目</div>
+              <div>{renderValue(tournament.event_type)}</div>
+
+              <div>性別</div>
+              <div>{renderValue(tournament.gender, "指定なし")}</div>
+
+              <div>クラス</div>
+              <div>{renderValue(tournament.level)}</div>
+
+              <div>参加資格</div>
+              <div>{renderValue(tournament.eligibility)}</div>
+
+              <div>参加費</div>
+              <div>{renderValue(tournament.fee_text)}</div>
+
+              <div>申込締切</div>
+              <div>{renderValue(tournament.deadline_text, "要項を確認")}</div>
+
+              <div>申込方法</div>
+              <div>
+                {hasApplicationUrl ? (
+                  <a
+                    className="text-link"
+                    href={applicationMethod}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    申込ページを開く ↗
+                  </a>
+                ) : (
+                  renderValue(applicationMethod)
+                )}
+              </div>
+            </div>
+          </section>
+
+          {tournament.data_quality_note ? (
+            <section className="notice detail-quality-note">
+              <strong>確認メモ</strong>
+              <p>{tournament.data_quality_note}</p>
+            </section>
+          ) : null}
+        </article>
+
+        <section className="detail-source-card card">
+          <div className="section-heading">
+            <div>
+              <h2>情報源</h2>
+              <p className="muted">公式情報を確認できるリンクです。</p>
+            </div>
+          </div>
+
+          {hasOfficialUrl ? (
+            <div className="source-row">
+              <span className="badge">公式</span>
+              <a
+                className="text-link source-url"
+                href={officialUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {officialUrl}
+              </a>
+              <span className="muted">{formatDate(tournament.last_checked_at)}</span>
+            </div>
+          ) : null}
+
+          {sources.length > 0 ? (
+            <div className="source-list">
+              {sources.map((source) => (
+                <div key={source.id} className="source-row">
+                  <span className="badge">{source.source_type}</span>
+                  {isUrl(source.url) ? (
+                    <a
+                      className="text-link source-url"
+                      href={source.url ?? "#"}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {source.url}
+                    </a>
+                  ) : (
+                    <span className="source-url">
+                      {renderValue(source.url)}
+                    </span>
+                  )}
+                  <span className="muted">{formatDate(source.checked_at)}</span>
+                </div>
+              ))}
+            </div>
+          ) : null}
+
+          {!hasOfficialUrl && sources.length === 0 ? (
+            <p className="muted">情報源は未登録です。</p>
+          ) : null}
+        </section>
       </div>
-    </div>
+    </main>
   );
 }
