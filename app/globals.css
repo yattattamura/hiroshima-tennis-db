@@ -1531,15 +1531,7 @@ textarea:focus {
   }
 
   .detail-actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .detail-actions .primary,
-  .detail-actions .outline-button {
-    width: 100%;
-    padding: 9px 8px;
-    font-size: 12px;
+    display: none;
   }
 
   .detail-source-card {
