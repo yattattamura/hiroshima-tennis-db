@@ -1502,7 +1502,7 @@ textarea:focus {
 
   .detail-keyitem {
     padding: 10px 9px;
-    border-right: 1px solid var(--border);
+    border-right: 1px solid #c7d5e4;
     border-bottom: 1px solid var(--border);
     border-top: 0;
   }
