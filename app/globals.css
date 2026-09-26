@@ -1121,6 +1121,9 @@ textarea:focus {
 
   .info-table {
     grid-template-columns: 1fr;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
   }
 
   .info-table div {
@@ -1134,6 +1137,15 @@ textarea:focus {
 
   .info-table div:nth-child(even) {
     padding-top: 3px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .info-table div:last-child {
+    border-bottom: 0;
+  }
+
+  .detail-actions {
+    display: none;
   }
 
   .notice {
