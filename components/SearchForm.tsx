@@ -18,9 +18,11 @@ type SearchValues = {
 export function SearchForm({
   cities,
   initialValues = {},
+  title = "大会を探す",
 }: {
   cities: string[];
   initialValues?: SearchValues;
+  title?: string;
 }) {
   const router = useRouter();
   const hasAdvancedFilters = Boolean(
@@ -65,7 +67,7 @@ export function SearchForm({
       onSubmit={submit}
     >
       <div className="search-panel-title">
-        大会を探す
+        {title}
       </div>
 
       <div className="search-primary-grid">
