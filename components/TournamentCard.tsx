@@ -120,7 +120,9 @@ export function TournamentCard({
           aria-label={"開催日 " + tournament.date}
         >
           <strong>{shortDate.monthDay}</strong>
-          {shortDate.weekday && <span>{shortDate.weekday}</span>}
+          {shortDate.weekday && (
+            <span className="date-weekday">{shortDate.weekday}</span>
+          )}
         </div>
 
         <div className="card-main tournament-card-main-v6">
