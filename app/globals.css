@@ -221,7 +221,11 @@ nav a:hover,
 }
 
 .hero .search-default-note {
+  margin: 7px 0 0;
   color: var(--green);
+  font-size: 11px;
+  line-height: 1.4;
+  font-weight: 700;
 }
 
 .quick-filter {
