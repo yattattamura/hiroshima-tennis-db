@@ -373,28 +373,34 @@ export default async function TournamentsPage({
 
         <div
           style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 12,
             marginBottom: 12,
           }}
         >
-          <div>
-            <h1 className="section-title" style={{ margin: 0 }}>
-              大会を探す
-            </h1>
-            <p className="muted" style={{ margin: "4px 0 0" }}>
-              {startItem}〜{endItem} / {totalCount}件
-            </p>
-          </div>
-          <Link href="/" className="section-link">
-            ホーム
-          </Link>
+          <h1 className="section-title" style={{ margin: 0 }}>
+            大会を探す
+          </h1>
+          <p className="muted" style={{ margin: "4px 0 0" }}>
+            {startItem}〜{endItem} / {totalCount}件
+          </p>
         </div>
 
         <SearchForm
           cities={cities}
+          title="検索条件を指定"
+          collapsible
+          initiallyCollapsed={
+            !(
+              keyword ||
+              period !== "all" ||
+              city ||
+              eventType ||
+              level ||
+              gender ||
+              eligibility ||
+              params.deadline ||
+              status
+            )
+          }
           initialValues={{
             keyword,
             period,
