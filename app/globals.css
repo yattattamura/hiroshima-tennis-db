@@ -533,6 +533,19 @@ textarea:focus {
   min-width: 0;
 }
 
+.search-results-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.search-results-count {
+  color: var(--muted);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
 .tournament-card {
   padding: 14px;
   display: grid;
@@ -616,6 +629,12 @@ textarea:focus {
   padding: 12px 8px;
   text-align: center;
   font-weight: 800;
+}
+
+.date-weekday {
+  display: block;
+  margin-top: 2px;
+  line-height: 1.2;
 }
 
 .badges {
@@ -1304,8 +1323,16 @@ textarea:focus {
     padding-top: 2px;
   }
 
+  .search-results-heading {
+    align-items: baseline;
+  }
+
   .search-results-heading h2 {
     font-size: 17px !important;
+  }
+
+  .search-results-count {
+    font-size: 12px;
   }
 
   .recent-tournament-card {
