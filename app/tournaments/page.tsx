@@ -379,9 +379,6 @@ export default async function TournamentsPage({
           <h1 className="section-title" style={{ margin: 0 }}>
             大会を探す
           </h1>
-          <p className="muted" style={{ margin: "4px 0 0" }}>
-            {startItem}〜{endItem} / {totalCount}件
-          </p>
         </div>
 
         <SearchForm
@@ -436,6 +433,9 @@ export default async function TournamentsPage({
         <section className="results">
           <div className="search-results-heading">
             <h2 style={{ margin: 0, fontSize: 18 }}>検索結果</h2>
+            <span className="search-results-count">
+              {startItem}〜{endItem} / {totalCount}件
+            </span>
           </div>
 
           {tournaments.map((tournament) => (
