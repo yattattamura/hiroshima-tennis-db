@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent } from "react";
+import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 
 type SearchValues = {
@@ -19,12 +19,19 @@ export function SearchForm({
   cities,
   initialValues = {},
   title = "大会を探す",
+  collapsible = false,
+  initiallyCollapsed = false,
 }: {
   cities: string[];
   initialValues?: SearchValues;
   title?: string;
+  collapsible?: boolean;
+  initiallyCollapsed?: boolean;
 }) {
   const router = useRouter();
+  const [collapsed, setCollapsed] = useState(
+    collapsible && initiallyCollapsed
+  );
   const hasAdvancedFilters = Boolean(
     initialValues.gender ||
       initialValues.eligibility ||
@@ -66,10 +73,31 @@ export function SearchForm({
       className="search-panel home-search-panel"
       onSubmit={submit}
     >
-      <div className="search-panel-title">
-        {title}
+      <div className="search-panel-heading">
+        <div className="search-panel-title">
+          {title}
+        </div>
+        {collapsible && (
+          <button
+            type="button"
+            className="search-panel-toggle"
+            onClick={() => setCollapsed((value) => !value)}
+            aria-expanded={!collapsed}
+          >
+            {collapsed ? "条件を変更" : "閉じる"}
+          </button>
+        )}
       </div>
 
+      {collapsed && (
+        <div className="search-collapsed-summary">
+          <span>申込：まだ申込可能</span>
+          <span className="search-collapsed-hint">条件を変更できます</span>
+        </div>
+      )}
+
+      {!collapsed && (
+        <>
       <div className="search-primary-grid">
         <label className="search-keyword-field">
           <span>キーワード</span>
@@ -225,6 +253,8 @@ export function SearchForm({
       <button className="primary search-button" type="submit">
         🔎 検索する
       </button>
+        </>
+      )}
     </form>
   );
 }
