@@ -329,20 +329,6 @@ export default async function TournamentsPage({
     )
   ).sort((a, b) => a.localeCompare(b, "ja"));
 
-  const activeConditions: string[] = [];
-
-  if (keyword) activeConditions.push(`「${keyword}」`);
-  if (period !== "all") activeConditions.push(getPeriodLabel(period));
-  if (city) activeConditions.push(city);
-  if (eventType) activeConditions.push(eventType);
-  if (gender) activeConditions.push(gender);
-  if (level) activeConditions.push(level);
-  if (eligibility === "external") activeConditions.push("非会員OK");
-  if (eligibility === "otherCity") activeConditions.push("他市協会員OK");
-  if (eligibility === "visitor") activeConditions.push("ビジターOK");
-  if (deadline) activeConditions.push(getDeadlineLabel(deadline));
-  if (status) activeConditions.push(status);
-
   const visiblePages = Array.from(
     { length: totalPages },
     (_, index) => index + 1
