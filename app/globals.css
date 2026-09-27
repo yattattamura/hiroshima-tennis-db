@@ -220,6 +220,10 @@ nav a:hover,
   font-weight: 700;
 }
 
+.hero .search-default-note {
+  color: var(--green);
+}
+
 .quick-filter {
   min-width: 0;
 }
