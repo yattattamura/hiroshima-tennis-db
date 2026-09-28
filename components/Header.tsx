@@ -2,9 +2,33 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
+
+const supabase = createClient();
 
 export function Header() {
   const pathname = usePathname();
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+
+    supabase.auth.getUser().then(({ data }) => {
+      if (mounted) {
+        setUserEmail(data.user?.email ?? null);
+      }
+    });
+
+    const { data: { subscription } } =
+      supabase.auth.onAuthStateChange((_event, session) => {
+        setUserEmail(session?.user?.email ?? null);
+      });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const isActive = (href: string) => {
     if (href === "/") {
@@ -20,8 +44,20 @@ export function Header() {
         <div className="container header-inner">
           <div className="header-top">
             <Link href="/" className="logo">
-              🎾 広島テニスポータル
+              🎾 みんなで作る広島テニスポータル
             </Link>
+
+            <div className="header-account">
+              {userEmail ? (
+                <Link href="/account" className="header-account-link">
+                  マイページ
+                </Link>
+              ) : (
+                <Link href="/auth/login" className="header-account-link">
+                  ログイン
+                </Link>
+              )}
+            </div>
 
           </div>
 
@@ -68,6 +104,13 @@ export function Header() {
           <span aria-hidden="true">🕘</span>
           <span>最近見た</span>
         </Link>
+        <Link
+          href={userEmail ? "/account" : "/auth/login"}
+          className={"mobile-bottom-nav-item" + ((pathname.startsWith("/account") || pathname.startsWith("/auth")) ? " active" : "")}
+        >
+          <span aria-hidden="true">👤</span>
+          <span>{userEmail ? "マイページ" : "ログイン"}</span>
+        </Link>
       </nav>
 
       <style
@@ -88,6 +131,17 @@ export function Header() {
             }
 
             .header-nav a {
+              white-space: nowrap;
+            }
+
+            .header-account {
+              flex-shrink: 0;
+            }
+
+            .header-account-link {
+              color: var(--blue);
+              font-size: 12px;
+              font-weight: 700;
               white-space: nowrap;
             }
 
@@ -162,7 +216,14 @@ export function Header() {
 
               .logo {
                 white-space: nowrap;
-                font-size: 14px;
+                font-size: 13px;
+                min-width: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
+              }
+
+              .header-account-link {
+                font-size: 11px;
               }
             }
           `,
