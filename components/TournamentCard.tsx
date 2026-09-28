@@ -4,25 +4,52 @@ import { Tournament } from "@/types/tournament";
 
 function getShortDate(dateText: string, startDate?: string) {
   const startDateMatch = startDate?.match(
-    /^(\d{4})-(\d{1,2})-(\d{1,2})$/
+    /^(\d{4})-(\d{1,2})-(\d{1,2})/
   );
-  const textMatch = dateText.match(
+  const textFullMatch = dateText.match(
     /(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})/
   );
-  const match = startDateMatch ?? textMatch;
+  const japaneseMatch = dateText.match(
+    /(\d{4})年(\d{1,2})月(\d{1,2})日/
+  );
 
-  if (!match) {
-    return { monthDay: dateText, weekday: "" };
+  const fullMatch = startDateMatch ?? textFullMatch ?? japaneseMatch;
+
+  let year: number;
+  let month: number;
+  let day: number;
+
+  if (fullMatch) {
+    year = Number(fullMatch[1]);
+    month = Number(fullMatch[2]);
+    day = Number(fullMatch[3]);
+  } else {
+    const monthDayMatch = dateText.match(
+      /(\d{1,2})[\/-月](\d{1,2})/
+    );
+
+    if (!monthDayMatch) {
+      return { monthDay: dateText, weekday: "" };
+    }
+
+    month = Number(monthDayMatch[1]);
+    day = Number(monthDayMatch[2]);
+
+    const inferredYear = startDate?.match(/^(\d{4})/)?.[1];
+    if (!inferredYear) {
+      return { monthDay: dateText, weekday: "" };
+    }
+
+    year = Number(inferredYear);
   }
 
-  const [, year, month, day] = match;
   const date = new Date(
-    Date.UTC(Number(year), Number(month) - 1, Number(day))
+    Date.UTC(year, month - 1, day)
   );
   const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
 
   return {
-    monthDay: Number(month) + "/" + Number(day),
+    monthDay: month + "/" + day,
     weekday: weekdays[date.getUTCDay()],
   };
 }
