@@ -126,12 +126,13 @@ export function Header() {
             @media (max-width: 700px) {
               .header-inner {
                 display: block;
+                min-height: 48px;
                 padding-left: 10px;
                 padding-right: 10px;
               }
 
               .header-top {
-                min-height: 42px;
+                min-height: 44px;
               }
 
               .header-actions {
