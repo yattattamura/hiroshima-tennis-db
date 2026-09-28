@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
+import { OrganizerFollowButton } from "@/components/OrganizerFollowButton";
 
 type OrganizerPageProps = {
   params: Promise<{
@@ -132,6 +133,10 @@ export default async function OrganizerPage({
           >
             登録大会 {tournaments?.length ?? 0}件
           </p>
+
+          <div style={{ marginTop: 14 }}>
+            <OrganizerFollowButton organizerId={organizer.id} />
+          </div>
 
           {organizer.website_url ? (
             <div style={{ marginTop: 18 }}>
