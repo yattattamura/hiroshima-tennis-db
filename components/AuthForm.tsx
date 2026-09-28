@@ -59,7 +59,7 @@ export function AuthForm({ mode, nextPath = "/account" }: AuthFormProps) {
       }
 
       setMessage(
-        "確認メールを送信しました。メール内のリンクから登録を完了してください。"
+        "登録処理を受け付けました。未確認の場合は確認メールが届きます。すでにアカウントがある場合はログインしてください。"
       );
       setIsSubmitting(false);
       return;
