@@ -110,7 +110,7 @@ export default async function OrganizersPage() {
   const organizers = (organizersResult.data ?? []) as Organizer[];
 
   return (
-    <div className="detail-page">
+    <div className="detail-page compact-info-page">
       <div className="container">
         <div className="breadcrumb">
           <Link href="/">ホーム</Link>
