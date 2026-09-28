@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 
   title: {
     default:
-      "広島テニスポータル｜広島県のテニス大会検索",
+      "みんなで作る広島テニスポータル｜広島県のテニス大会検索",
     template:
       "%s | 広島テニスポータル",
   },
