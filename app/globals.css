@@ -2059,3 +2059,84 @@ textarea:focus {
     font-size: 12px;
   }
 }
+
+
+/* Remove redundant first/last child margins on dense mobile content */
+@media (max-width: 640px) {
+  .compact-info-page .card > :first-child,
+  .legal-page > :first-child {
+    margin-top: 0 !important;
+  }
+
+  .compact-info-page .card > :last-child,
+  .legal-page > :last-child {
+    margin-bottom: 0 !important;
+  }
+
+  .compact-info-page .container > section:not(.info-intro-card):not(.info-list-section):not(.info-content-section) {
+    margin-top: 14px !important;
+  }
+
+  .compact-info-page .container > section:not(.info-intro-card):not(.info-list-section):not(.info-content-section) > h2 {
+    margin-top: 0 !important;
+    margin-bottom: 6px !important;
+    font-size: 20px !important;
+    line-height: 1.2 !important;
+  }
+
+  .compact-info-page .container > section:not(.info-intro-card):not(.info-list-section):not(.info-content-section) > .card {
+    padding: 14px !important;
+  }
+
+  .compact-info-page .info-intro-card > p:first-of-type {
+    margin-top: 0 !important;
+  }
+
+  .compact-info-page .info-intro-card > p:last-of-type {
+    margin-bottom: 0 !important;
+  }
+
+  .compact-info-page form {
+    gap: 11px !important;
+    margin-top: 14px !important;
+  }
+
+  .compact-info-page form label span {
+    font-size: 11px !important;
+    margin-bottom: 3px !important;
+  }
+
+  .compact-info-page form select,
+  .compact-info-page form input:not([type="text"][aria-hidden="true"]),
+  .compact-info-page form textarea {
+    min-height: 40px;
+    padding: 7px 8px;
+    font-size: 14px;
+  }
+
+  .compact-info-page form textarea {
+    min-height: 110px;
+  }
+
+  .compact-info-page form .card {
+    padding: 12px !important;
+  }
+
+  .compact-info-page form .primary {
+    min-height: 40px;
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+
+  .legal-page h1 + .muted {
+    margin-top: 6px !important;
+  }
+
+  .legal-page h1 + p {
+    margin-top: 8px !important;
+  }
+
+  .legal-page h2 + p {
+    margin-top: 6px !important;
+  }
+}
