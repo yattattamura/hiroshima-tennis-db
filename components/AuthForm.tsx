@@ -164,12 +164,19 @@ export function AuthForm({ mode, nextPath = "/account" }: AuthFormProps) {
             </Link>
           </p>
         ) : (
-          <p>
-            アカウントをお持ちでない方は{" "}
-            <Link href={"/auth/signup?next=" + encodeURIComponent(nextPath)}>
-              無料で作成
-            </Link>
-          </p>
+          <>
+            <p>
+              アカウントをお持ちでない方は{" "}
+              <Link href={"/auth/signup?next=" + encodeURIComponent(nextPath)}>
+                無料で作成
+              </Link>
+            </p>
+            <p>
+              <Link href="/auth/forgot-password">
+                パスワードを忘れた方はこちら
+              </Link>
+            </p>
+          </>
         )}
       </div>
     </section>
