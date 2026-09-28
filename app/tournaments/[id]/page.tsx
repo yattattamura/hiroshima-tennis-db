@@ -248,13 +248,22 @@ export default async function TournamentDetail({
                 marginBottom: 20,
               }}
             >
-              <h1
-                style={{
-                  marginBottom: 0,
-                }}
-              >
-                {tournament.name}
-              </h1>
+              <div className="detail-title-block">
+                <h1
+                  style={{
+                    marginBottom: 0,
+                  }}
+                >
+                  {tournament.name}
+                </h1>
+
+                <Link
+                  className="detail-correction-link"
+                  href={`/tournaments/${tournament.id}/suggest`}
+                >
+                  この大会情報に誤りを見つけたら？ <span>修正を依頼 →</span>
+                </Link>
+              </div>
 
               <FavoriteButton
                 tournamentId={
