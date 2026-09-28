@@ -96,7 +96,7 @@ export default async function AreasPage() {
   );
 
   return (
-    <div className="detail-page">
+    <div className="detail-page compact-info-page">
       <div className="container">
         <div className="breadcrumb">
           <Link href="/">ホーム</Link>
