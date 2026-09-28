@@ -5,21 +5,11 @@ export type TournamentDateInfo = {
   weekday: string;
 };
 
-function parseStartDate(startDate?: string): {
-  year: number;
-  month: number;
-  day: number;
-} | null {
-  const value = startDate?.slice(0, 10) ?? "";
-
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-    return null;
-  }
-
-  const year = Number(value.slice(0, 4));
-  const month = Number(value.slice(5, 7));
-  const day = Number(value.slice(8, 10));
-
+function validateDate(
+  year: number,
+  month: number,
+  day: number
+): { year: number; month: number; day: number } | null {
   if (
     !Number.isInteger(year) ||
     !Number.isInteger(month) ||
@@ -45,6 +35,50 @@ function parseStartDate(startDate?: string): {
   return { year, month, day };
 }
 
+function parseStartDate(startDate?: string): {
+  year: number;
+  month: number;
+  day: number;
+} | null {
+  const value = startDate?.slice(0, 10) ?? "";
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return null;
+  }
+
+  return validateDate(
+    Number(value.slice(0, 4)),
+    Number(value.slice(5, 7)),
+    Number(value.slice(8, 10))
+  );
+}
+
+function createDateInfo(
+  year: number,
+  month: number,
+  day: number
+): TournamentDateInfo | null {
+  const validDate = validateDate(year, month, day);
+
+  if (!validDate) {
+    return null;
+  }
+
+  const date = new Date(
+    Date.UTC(
+      validDate.year,
+      validDate.month - 1,
+      validDate.day
+    )
+  );
+
+  return {
+    monthDay:
+      validDate.month + "/" + validDate.day,
+    weekday: WEEKDAYS[date.getUTCDay()],
+  };
+}
+
 export function getTournamentDateInfo(
   dateText: string,
   startDate?: string
@@ -52,19 +86,11 @@ export function getTournamentDateInfo(
   const parsedStartDate = parseStartDate(startDate);
 
   if (parsedStartDate) {
-    const date = new Date(
-      Date.UTC(
-        parsedStartDate.year,
-        parsedStartDate.month - 1,
-        parsedStartDate.day
-      )
-    );
-
-    return {
-      monthDay:
-        parsedStartDate.month + "/" + parsedStartDate.day,
-      weekday: WEEKDAYS[date.getUTCDay()],
-    };
+    return createDateInfo(
+      parsedStartDate.year,
+      parsedStartDate.month,
+      parsedStartDate.day
+    )!;
   }
 
   const japaneseMatch = dateText.match(
@@ -80,32 +106,27 @@ export function getTournamentDateInfo(
   const match = japaneseMatch ?? slashFullMatch;
 
   if (match) {
-    const year = Number(match[1]);
-    const month = Number(match[2]);
-    const day = Number(match[3]);
-    const date = new Date(Date.UTC(year, month - 1, day));
+    const info = createDateInfo(
+      Number(match[1]),
+      Number(match[2]),
+      Number(match[3])
+    );
 
-    if (!Number.isNaN(date.getTime())) {
-      return {
-        monthDay: month + "/" + day,
-        weekday: WEEKDAYS[date.getUTCDay()],
-      };
+    if (info) {
+      return info;
     }
   }
 
   if (monthDayMatch) {
     const currentYear = new Date().getUTCFullYear();
-    const month = Number(monthDayMatch[1]);
-    const day = Number(monthDayMatch[2]);
-    const date = new Date(
-      Date.UTC(currentYear, month - 1, day)
+    const info = createDateInfo(
+      currentYear,
+      Number(monthDayMatch[1]),
+      Number(monthDayMatch[2])
     );
 
-    if (!Number.isNaN(date.getTime())) {
-      return {
-        monthDay: month + "/" + day,
-        weekday: WEEKDAYS[date.getUTCDay()],
-      };
+    if (info) {
+      return info;
     }
   }
 
