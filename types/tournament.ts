@@ -3,6 +3,7 @@ export type Tournament = {
   name: string;
   organizer: string;
   date: string;
+  startDate?: string;
   city: string;
   venue: string;
   eventType: string;
