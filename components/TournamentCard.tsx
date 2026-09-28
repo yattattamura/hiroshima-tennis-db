@@ -121,7 +121,9 @@ export function TournamentCard({
         >
           <strong>{shortDate.monthDay}</strong>
           {shortDate.weekday && (
-            <span className="date-weekday">{shortDate.weekday}</span>
+            <span className="date-weekday" aria-label={"曜日 " + shortDate.weekday}>
+              {shortDate.weekday.replace(/[()（）祝休日]/g, "")}
+            </span>
           )}
         </div>
 
