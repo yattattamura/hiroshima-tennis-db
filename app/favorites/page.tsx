@@ -149,12 +149,62 @@ function formatDeadlineText(deadlineDate: string | null): string {
 export default async function FavoritesPage() {
   const supabase = await createClient();
   const cookieStore = await cookies();
-  const favoriteIds = readFavoriteIds(cookieStore.get(COOKIE_NAME)?.value);
+  const favoriteIds = readFavoriteIds(
+    cookieStore.get(COOKIE_NAME)?.value
+  );
   const today = getJapanToday();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   let favoriteRows: any[] = [];
 
-  if (favoriteIds.length > 0) {
+  if (user) {
+    const { data: favoriteLinks, error: favoriteError } = await supabase
+      .from("user_favorites")
+      .select("tournament_id, created_at")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+
+    if (!favoriteError && favoriteLinks) {
+      const ids = favoriteLinks
+        .map((row) => row.tournament_id)
+        .filter((id): id is string => typeof id === "string");
+
+      if (ids.length > 0) {
+        const { data } = await supabase
+          .from("tournaments")
+          .select("*")
+          .in("id", ids);
+
+        favoriteRows = [...(data ?? [])];
+      }
+    }
+
+    const missingIds = favoriteIds.filter(
+      (id) => !favoriteRows.some((row) => row.id === id)
+    );
+
+    if (missingIds.length > 0) {
+      const { data } = await supabase
+        .from("tournaments")
+        .select("*")
+        .in("id", missingIds);
+
+      if (data && data.length > 0) {
+        await supabase.from("user_favorites").upsert(
+          data.map((row) => ({
+            user_id: user.id,
+            tournament_id: row.id,
+          })),
+          { onConflict: "user_id,tournament_id" }
+        );
+
+        favoriteRows.push(...data);
+      }
+    }
+  } else if (favoriteIds.length > 0) {
     const { data, error } = await supabase
       .from("tournaments")
       .select("*")
@@ -222,6 +272,11 @@ export default async function FavoritesPage() {
                 </span>
               ) : null}
             </div>
+            {!user ? (
+              <p className="muted favorite-login-hint">
+                ログインするとお気に入りを端末間で同期できます。
+              </p>
+            ) : null}
           </div>
 
           <Link href="/tournaments" className="outline-button">
