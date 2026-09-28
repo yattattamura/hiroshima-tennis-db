@@ -4,7 +4,6 @@ export type Tournament = {
   organizer: string;
   date: string;
   startDate?: string;
-  weekday?: string;
   city: string;
   venue: string;
   eventType: string;
