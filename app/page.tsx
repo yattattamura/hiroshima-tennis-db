@@ -203,6 +203,18 @@ export default async function Home() {
             cities={cities}
             title="検索条件を指定"
           />
+
+          <div className="home-community-note">
+            <div>
+              <strong>みんなで大会情報を育てよう</strong>
+              <p>
+                情報の誤りを見つけたら、無料アカウントを作って修正依頼を送れます。
+              </p>
+            </div>
+            <Link href="/auth/signup" className="outline-button">
+              無料で参加する
+            </Link>
+          </div>
         </div>
       </section>
 
