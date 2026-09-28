@@ -380,7 +380,7 @@ export default async function TournamentsPage({
               level ||
               gender ||
               eligibility ||
-              params.deadline ||
+              (params.deadline && params.deadline !== "open") ||
               status
             )
           }
