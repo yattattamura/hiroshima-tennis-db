@@ -126,6 +126,7 @@ export function TournamentCard({
   tournament: Tournament;
 }) {
   const shortDate = getShortDate(tournament.date, tournament.startDate);
+  const weekday = tournament.weekday || shortDate.weekday;
   const deadlineInfo = getDeadlineLabel(tournament.deadlineDate);
 
   const fallbackDeadline =
@@ -155,9 +156,9 @@ export function TournamentCard({
           aria-label={"開催日 " + tournament.date}
         >
           <strong>{shortDate.monthDay}</strong>
-          {shortDate.weekday && (
-            <span className="date-weekday" aria-label={"曜日 " + shortDate.weekday}>
-              {shortDate.weekday.replace(/[()（）祝休日]/g, "")}
+          {weekday && (
+            <span className="date-weekday" aria-label={"曜日 " + weekday}>
+              {weekday.replace(/[()（）祝休日]/g, "")}
             </span>
           )}
         </div>
