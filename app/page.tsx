@@ -61,6 +61,7 @@ function convertTournament(row: SearchTournamentRow): Tournament {
     name: row.name,
     organizer: row.organizer_name_raw ?? "",
     date: row.date_text ?? "",
+    startDate: row.start_date ?? undefined,
     city: row.city ?? "",
     venue: row.venue_name_raw ?? "",
     eventType: row.event_type ?? "",
