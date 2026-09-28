@@ -36,11 +36,13 @@ function getShortDate(dateText: string, startDate?: string) {
     day = Number(monthDayMatch[2]);
 
     const inferredYear = startDate?.match(/^(\d{4})/)?.[1];
-    if (!inferredYear) {
-      return { monthDay: dateText, weekday: "" };
-    }
-
-    year = Number(inferredYear);
+    year = Number(
+      inferredYear ??
+        new Intl.DateTimeFormat("en-US", {
+          timeZone: "Asia/Tokyo",
+          year: "numeric",
+        }).format(new Date())
+    );
   }
 
   const date = new Date(
