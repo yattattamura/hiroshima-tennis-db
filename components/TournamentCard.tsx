@@ -2,59 +2,7 @@ import Link from "next/link";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { Tournament } from "@/types/tournament";
 
-function getShortDate(dateText: string, startDate?: string) {
-  const startDateMatch = startDate?.match(
-    /^(\d{4})-(\d{1,2})-(\d{1,2})/
-  );
-  const textFullMatch = dateText.match(
-    /(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})/
-  );
-  const japaneseMatch = dateText.match(
-    /(\d{4})年(\d{1,2})月(\d{1,2})日/
-  );
-
-  const fullMatch = startDateMatch ?? textFullMatch ?? japaneseMatch;
-
-  let year: number;
-  let month: number;
-  let day: number;
-
-  if (fullMatch) {
-    year = Number(fullMatch[1]);
-    month = Number(fullMatch[2]);
-    day = Number(fullMatch[3]);
-  } else {
-    const monthDayMatch = dateText.match(
-      /(\d{1,2})[\/-月](\d{1,2})/
-    );
-
-    if (!monthDayMatch) {
-      return { monthDay: dateText, weekday: "" };
-    }
-
-    month = Number(monthDayMatch[1]);
-    day = Number(monthDayMatch[2]);
-
-    const inferredYear = startDate?.match(/^(\d{4})/)?.[1];
-    year = Number(
-      inferredYear ??
-        new Intl.DateTimeFormat("en-US", {
-          timeZone: "Asia/Tokyo",
-          year: "numeric",
-        }).format(new Date())
-    );
-  }
-
-  const date = new Date(
-    Date.UTC(year, month - 1, day)
-  );
-  const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
-
-  return {
-    monthDay: month + "/" + day,
-    weekday: weekdays[date.getUTCDay()],
-  };
-}
+import { getTournamentDateInfo } from "@/lib/tournamentDate";
 
 function getJapanToday(): string {
   const parts = new Intl.DateTimeFormat("en-US", {
@@ -125,8 +73,7 @@ export function TournamentCard({
 }: {
   tournament: Tournament;
 }) {
-  const shortDate = getShortDate(tournament.date, tournament.startDate);
-  const weekday = tournament.weekday || shortDate.weekday;
+  const shortDate = getTournamentDateInfo(tournament.date, tournament.startDate);
   const deadlineInfo = getDeadlineLabel(tournament.deadlineDate);
 
   const fallbackDeadline =
@@ -156,9 +103,9 @@ export function TournamentCard({
           aria-label={"開催日 " + tournament.date}
         >
           <strong>{shortDate.monthDay}</strong>
-          {weekday && (
-            <span className="date-weekday" aria-label={"曜日 " + weekday}>
-              {weekday.replace(/[()（）祝休日]/g, "")}
+          {shortDate.weekday && (
+            <span className="date-weekday" aria-label={"曜日 " + shortDate.weekday}>
+              {shortDate.weekday}
             </span>
           )}
         </div>
