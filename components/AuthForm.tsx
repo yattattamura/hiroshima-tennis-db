@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
+const supabase = createClient();
+
 type AuthFormProps = {
   mode: "login" | "signup";
   nextPath?: string;
@@ -12,8 +14,6 @@ type AuthFormProps = {
 
 export function AuthForm({ mode, nextPath = "/account" }: AuthFormProps) {
   const router = useRouter();
-  const supabase = createClient();
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
