@@ -6,7 +6,7 @@ import { SITE_NAME } from "@/lib/site";
 export const metadata: Metadata = {
   title: "プライバシーポリシー",
   description:
-    "広島テニスポータルにおける個人情報の取扱いについて説明します。",
+    "アカウント情報、問い合わせ、大会情報の修正提案などに関する個人情報の取扱いについて説明します。",
 };
 
 export default function PrivacyPage() {
@@ -40,8 +40,8 @@ export default function PrivacyPage() {
 
           <h2>1. 取得する情報</h2>
           <p className="muted" style={{ lineHeight: 1.9 }}>
-            お問い合わせや大会情報の修正提案などの際に、
-            利用者が入力した氏名、メールアドレス、問い合わせ内容、修正内容、参考URL等を取得することがあります。
+            アカウント登録時にメールアドレス等の認証情報を取得します。
+            また、お問い合わせや大会情報の修正提案では、利用者が入力した問い合わせ内容、修正内容、参考URL等を取得することがあります。
             必要のない情報を収集することはありません。
           </p>
 
