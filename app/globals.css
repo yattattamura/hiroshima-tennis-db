@@ -1935,3 +1935,127 @@ textarea:focus {
     margin-bottom: 24px !important;
   }
 }
+
+
+/* Extra mobile density for informational and legal pages */
+@media (max-width: 640px) {
+  .compact-info-page .info-intro-card,
+  .legal-page {
+    padding: 14px !important;
+  }
+
+  .compact-info-page .info-intro-card .badges,
+  .legal-page .badges {
+    margin-bottom: 4px;
+  }
+
+  .compact-info-page .info-intro-card h1 {
+    margin-top: 5px !important;
+    margin-bottom: 8px !important;
+    font-size: 27px !important;
+    line-height: 1.15 !important;
+  }
+
+  .compact-info-page .info-intro-card p,
+  .compact-info-page .info-content-card p,
+  .compact-info-page .info-scope-card p,
+  .compact-info-page .info-content-section p,
+  .compact-info-page .info-scope-card,
+  .legal-page p {
+    font-size: 14px !important;
+    line-height: 1.55 !important;
+  }
+
+  .compact-info-page .info-content-section,
+  .compact-info-page .info-list-section {
+    margin-top: 14px !important;
+  }
+
+  .compact-info-page .info-content-section > h2,
+  .compact-info-page .info-list-section h2 {
+    font-size: 20px !important;
+    line-height: 1.2 !important;
+    margin-top: 0;
+    margin-bottom: 5px;
+  }
+
+  .compact-info-page .info-content-card {
+    padding: 14px !important;
+    margin-top: 8px;
+  }
+
+  .compact-info-page .info-content-card h3 {
+    margin-top: 11px;
+    margin-bottom: 4px;
+    font-size: 16px !important;
+    line-height: 1.25 !important;
+  }
+
+  .compact-info-page .info-content-card h3:first-child {
+    margin-top: 0;
+  }
+
+  .compact-info-page .info-scope-card {
+    padding: 14px !important;
+    margin-top: 14px !important;
+    margin-bottom: 18px !important;
+  }
+
+  .compact-info-page .info-list-section .section-heading {
+    margin-bottom: 6px;
+  }
+
+  .compact-info-page .info-list-section .outline-button {
+    min-height: 36px;
+    padding: 6px 9px;
+    font-size: 11px;
+  }
+
+  .compact-info-page .info-list-card {
+    padding: 10px !important;
+  }
+
+  .compact-info-page .info-list-card strong {
+    font-size: 13px !important;
+  }
+
+  .compact-info-page .info-list-card .muted {
+    font-size: 10px !important;
+    line-height: 1.4 !important;
+  }
+
+  .compact-info-page .info-list-card .section-link {
+    font-size: 10px;
+  }
+
+  .legal-page {
+    margin-top: 8px !important;
+    margin-bottom: 18px !important;
+    border-radius: 12px;
+  }
+
+  .legal-page h1 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 27px;
+    line-height: 1.15;
+  }
+
+  .legal-page h2 {
+    margin-top: 18px;
+    margin-bottom: 6px;
+    font-size: 19px;
+    line-height: 1.2;
+  }
+
+  .legal-page .muted {
+    font-size: 12px !important;
+    line-height: 1.45 !important;
+  }
+
+  .legal-page .outline-button {
+    min-height: 36px;
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+}
