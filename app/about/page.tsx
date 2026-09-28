@@ -86,11 +86,11 @@ export default function AboutPage() {
           </div>
         </section>
 
-        <section style={{ marginTop: 26 }}>
+        <section className="info-content-section" style={{ marginTop: 26 }}>
           <h2>情報の掲載・更新について</h2>
 
           <div
-            className="card"
+            className="card info-content-card"
             style={{ padding: 24 }}
           >
             <p
@@ -111,11 +111,11 @@ export default function AboutPage() {
           </div>
         </section>
 
-        <section style={{ marginTop: 26 }}>
+        <section className="info-content-section" style={{ marginTop: 26 }}>
           <h2>掲載情報の修正</h2>
 
           <div
-            className="card"
+            className="card info-content-card"
             style={{ padding: 24 }}
           >
             <p
