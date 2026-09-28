@@ -215,7 +215,7 @@ export function SearchForm({
         className="advanced-filters"
         open={hasAdvancedFilters}
       >
-        <summary>詳細条件</summary>
+        <summary>詳細条件 ＋</summary>
 
         <div className="advanced-filter-grid">
           <label>
