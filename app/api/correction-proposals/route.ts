@@ -2,6 +2,15 @@ import { NextResponse } from "next/server";
 
 import { createClient } from "@/lib/supabase/server";
 
+const ALLOWED_FIELDS = new Set([
+  "開催日・予備日",
+  "会場",
+  "参加資格",
+  "申込締切",
+  "参加費",
+  "その他",
+]);
+
 export async function POST(request: Request) {
   const formData = await request.formData();
 
@@ -14,6 +23,12 @@ export async function POST(request: Request) {
 
   if (!tournamentId || !fieldName || !proposedValue) {
     return new NextResponse("必須項目が入力されていません", {
+      status: 400,
+    });
+  }
+
+  if (!ALLOWED_FIELDS.has(fieldName)) {
+    return new NextResponse("修正項目が正しくありません", {
       status: 400,
     });
   }
