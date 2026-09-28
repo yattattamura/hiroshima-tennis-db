@@ -18,7 +18,7 @@ const categories = [
 
 export default function ContactPage() {
   return (
-    <div className="detail-page">
+    <div className="detail-page compact-info-page">
       <div className="container">
         <div className="breadcrumb">
           <Link href="/">ホーム</Link>
@@ -27,7 +27,7 @@ export default function ContactPage() {
         </div>
 
         <section
-          className="card"
+          className="card info-intro-card"
           style={{
             padding: 28,
             marginTop: 20,
@@ -167,7 +167,7 @@ export default function ContactPage() {
         </section>
 
         <section
-          className="card"
+          className="card info-scope-card"
           style={{
             padding: 24,
             marginTop: 20,
