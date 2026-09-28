@@ -2,8 +2,14 @@ import Link from "next/link";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { Tournament } from "@/types/tournament";
 
-function getShortDate(dateText: string) {
-  const match = dateText.match(/(\d{4})\/(\d{1,2})\/(\d{1,2})/);
+function getShortDate(dateText: string, startDate?: string) {
+  const startDateMatch = startDate?.match(
+    /^(\d{4})-(\d{1,2})-(\d{1,2})$/
+  );
+  const textMatch = dateText.match(
+    /(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})/
+  );
+  const match = startDateMatch ?? textMatch;
 
   if (!match) {
     return { monthDay: dateText, weekday: "" };
@@ -90,7 +96,7 @@ export function TournamentCard({
 }: {
   tournament: Tournament;
 }) {
-  const shortDate = getShortDate(tournament.date);
+  const shortDate = getShortDate(tournament.date, tournament.startDate);
   const deadlineInfo = getDeadlineLabel(tournament.deadlineDate);
 
   const fallbackDeadline =
