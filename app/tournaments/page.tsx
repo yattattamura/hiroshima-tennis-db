@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { SearchForm } from "@/components/SearchForm";
 import { TournamentCard } from "@/components/TournamentCard";
 import { Tournament } from "@/types/tournament";
+import { SaveSearchButton } from "@/components/SaveSearchButton";
 
 type SearchParams = {
   period?: string;
@@ -397,6 +398,22 @@ export default async function TournamentsPage({
             status,
           }}
         />
+
+        <div className="search-save-row">
+          <SaveSearchButton
+            filters={{
+              keyword,
+              period,
+              city,
+              eventType,
+              level,
+              gender,
+              eligibility,
+              deadline: params.deadline ?? "open",
+              status,
+            }}
+          />
+        </div>
 
         <section className="results">
           <div className="search-results-heading">
