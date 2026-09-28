@@ -47,7 +47,7 @@ export default async function AreasPage() {
 
   if (error) {
     return (
-      <div className="detail-page">
+      <div className="detail-page compact-info-page">
         <div className="container">
           <div className="breadcrumb">
             <Link href="/">ホーム</Link>
@@ -105,7 +105,7 @@ export default async function AreasPage() {
         </div>
 
         <section
-          className="card"
+          className="card info-intro-card"
           style={{ padding: 28, marginTop: 20 }}
         >
           <div className="badges">
@@ -127,7 +127,7 @@ export default async function AreasPage() {
           </p>
         </section>
 
-        <section style={{ marginTop: 26 }}>
+        <section className="info-list-section" style={{ marginTop: 26 }}>
           <div className="section-heading">
             <div>
               <h2>現在掲載中のエリア</h2>
@@ -150,6 +150,7 @@ export default async function AreasPage() {
                 display: "grid",
                 gridTemplateColumns:
                   "repeat(auto-fit, minmax(220px, 1fr))",
+                
                 gap: 12,
                 marginTop: 14,
               }}
@@ -158,7 +159,7 @@ export default async function AreasPage() {
                 <Link
                   key={area.city}
                   href={`/tournaments?city=${encodeURIComponent(area.city)}`}
-                  className="card"
+                  className="card info-list-card"
                   style={{
                     display: "block",
                     padding: 20,
@@ -208,7 +209,7 @@ export default async function AreasPage() {
         </section>
 
         <section
-          className="card"
+          className="card info-scope-card"
           style={{
             padding: 24,
             marginTop: 28,
