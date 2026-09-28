@@ -20,14 +20,6 @@ type SearchParams = {
 
 const PAGE_SIZE = 20;
 
-function getWeekday(startDate?: string): string {
-  if (!startDate) return "";
-  const match = startDate.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
-  if (!match) return "";
-  const date = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])));
-  return ["日", "月", "火", "水", "木", "金", "土"][date.getUTCDay()];
-}
-
 function getJapanToday(): string {
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone: "Asia/Tokyo",
@@ -59,7 +51,6 @@ function convertTournament(row: any): Tournament {
     organizer: row.organizer_name_raw ?? "",
     date: row.date_text ?? "",
     startDate: row.start_date ?? undefined,
-    weekday: getWeekday(row.start_date ?? undefined),
     city: row.city ?? "",
     venue: row.venue_name_raw ?? "",
     eventType: row.event_type ?? "",
