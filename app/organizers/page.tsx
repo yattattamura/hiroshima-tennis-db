@@ -59,7 +59,7 @@ export default async function OrganizersPage() {
       "データの取得に失敗しました。";
 
     return (
-      <div className="detail-page">
+      <div className="detail-page compact-info-page">
         <div className="container">
           <div className="breadcrumb">
             <Link href="/">ホーム</Link>
@@ -119,7 +119,7 @@ export default async function OrganizersPage() {
         </div>
 
         <section
-          className="card"
+          className="card info-intro-card"
           style={{ padding: 28, marginTop: 20 }}
         >
           <div className="badges">
@@ -142,7 +142,7 @@ export default async function OrganizersPage() {
           </p>
         </section>
 
-        <section style={{ marginTop: 26 }}>
+        <section className="info-list-section" style={{ marginTop: 26 }}>
           <div className="section-heading">
             <div>
               <h2>現在掲載中の主催者</h2>
@@ -180,7 +180,7 @@ export default async function OrganizersPage() {
                   <Link
                     key={organizer.id}
                     href={`/organizers/${organizer.id}`}
-                    className="card"
+                    className="card info-list-card organizer-list-card"
                     style={{
                       display: "block",
                       padding: 20,
@@ -275,7 +275,7 @@ export default async function OrganizersPage() {
         </section>
 
         <section
-          className="card"
+          className="card info-scope-card"
           style={{
             padding: 24,
             marginTop: 28,
