@@ -1738,3 +1738,92 @@ textarea:focus {
     grid-column: 1;
   }
 }
+
+
+/* Tournament detail correction entry */
+.detail-title-block {
+  min-width: 0;
+  flex: 1;
+}
+
+.detail-correction-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.detail-correction-link span {
+  color: var(--blue);
+  font-weight: 700;
+}
+
+.detail-correction-link:hover {
+  color: var(--blue);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@media (max-width: 640px) {
+  .home-hero {
+    padding-top: 20px;
+    padding-bottom: 14px;
+  }
+
+  .home-hero .hero-copy {
+    margin-bottom: 10px;
+  }
+
+  .home-hero .hero-eyebrow {
+    margin-bottom: 3px;
+    font-size: 11px;
+  }
+
+  .home-hero .hero h1 {
+    font-size: 27px;
+    line-height: 1.15;
+  }
+
+  .home-hero .search-panel {
+    padding: 10px;
+  }
+
+  .home-hero .search-panel-title {
+    margin-bottom: 7px;
+    font-size: 14px;
+  }
+
+  .home-hero .search-primary-grid {
+    gap: 6px;
+  }
+
+  .home-hero .search-keyword-field input {
+    min-height: 40px;
+  }
+
+  .home-hero .quick-filter-top {
+    margin-bottom: 2px;
+  }
+
+  .home-hero .search-default-note {
+    margin-top: 4px;
+  }
+
+  .home-hero .advanced-filters {
+    margin-top: 7px;
+    padding-top: 7px;
+  }
+
+  .home-hero .search-button {
+    margin-top: 7px;
+    min-height: 40px;
+  }
+
+  .detail-correction-link {
+    margin-top: 6px;
+    font-size: 11px;
+  }
+}
