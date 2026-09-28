@@ -34,7 +34,7 @@ type SearchTournamentRow = {
 
 function getWeekday(startDate?: string): string {
   if (!startDate) return "";
-  const match = startDate.match(/^(\\d{4})-(\\d{1,2})-(\\d{1,2})/);
+  const match = startDate.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
   if (!match) return "";
   const date = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])));
   return ["日", "月", "火", "水", "木", "金", "土"][date.getUTCDay()];
