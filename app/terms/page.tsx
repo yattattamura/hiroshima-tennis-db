@@ -20,7 +20,7 @@ export default function TermsPage() {
         </div>
 
         <article
-          className="card"
+          className="card legal-page"
           style={{
             padding: 28,
             marginTop: 20,
