@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <div className="detail-page">
+    <div className="detail-page compact-info-page">
       <div className="container">
         <div className="breadcrumb">
           <Link href="/">ホーム</Link>
@@ -20,7 +20,7 @@ export default function AboutPage() {
         </div>
 
         <section
-          className="card"
+          className="card info-intro-card"
           style={{ padding: 28, marginTop: 20 }}
         >
           <div className="badges">
@@ -41,11 +41,11 @@ export default function AboutPage() {
           </p>
         </section>
 
-        <section style={{ marginTop: 26 }}>
+        <section className="info-content-section" style={{ marginTop: 26 }}>
           <h2>掲載対象</h2>
 
           <div
-            className="card"
+            className="card info-content-card"
             style={{ padding: 24 }}
           >
             <h3 style={{ marginTop: 0 }}>
@@ -137,7 +137,7 @@ export default function AboutPage() {
         </section>
 
         <section
-          className="card"
+          className="card info-content-card"
           style={{
             padding: 24,
             marginTop: 26,
