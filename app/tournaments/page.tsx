@@ -5,6 +5,7 @@ import { SearchForm } from "@/components/SearchForm";
 import { TournamentCard } from "@/components/TournamentCard";
 import { Tournament } from "@/types/tournament";
 import { SaveSearchButton } from "@/components/SaveSearchButton";
+import { resolveTournamentCity } from "@/lib/tournamentLocation";
 
 type SearchParams = {
   period?: string;
@@ -52,7 +53,7 @@ function convertTournament(row: any): Tournament {
     organizer: row.organizer_name_raw ?? "",
     date: row.date_text ?? "",
     startDate: row.start_date ?? undefined,
-    city: row.city ?? "",
+    city: resolveTournamentCity(row.city, row.venue_name_raw),
     venue: row.venue_name_raw ?? "",
     eventType: row.event_type ?? "",
     gender: row.gender ?? "",
@@ -60,6 +61,7 @@ function convertTournament(row: any): Tournament {
     eligibility: row.eligibility ?? "",
     fee: row.fee_text ?? "",
     deadline: row.deadline_text ?? "",
+    deadlineDate: row.deadline_date ?? undefined,
     applicationMethod: row.application_method ?? "",
     officialUrl: row.official_url ?? "",
     status: row.status ?? "",
