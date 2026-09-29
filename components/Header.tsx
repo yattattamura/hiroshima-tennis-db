@@ -45,7 +45,7 @@ export function Header() {
         <div className="container header-inner">
           <div className="header-top">
             <Link href="/" className="logo">
-              🎾 みんなで作る広島テニスポータル
+              🎾 KNOW NIS
             </Link>
 
             <div className="header-account">
