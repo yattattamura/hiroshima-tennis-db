@@ -55,6 +55,12 @@ export default async function AccountPage() {
     redirect("/auth/login?next=/account");
   }
 
+  const { data: adminUser } = await supabase
+    .from("admin_users")
+    .select("user_id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
   const today = getJapanToday();
 
   const [
@@ -193,9 +199,11 @@ export default async function AccountPage() {
             <Link className="primary" href="/tournaments">
               大会を探す
             </Link>
-            <Link className="outline-button" href="/admin/deadlines">
-              締切メンテナンス
-            </Link>
+            {adminUser ? (
+              <Link className="outline-button" href="/admin/deadlines">
+                締切メンテナンス
+              </Link>
+            ) : null}
             <LogoutButton />
           </div>
         </section>
