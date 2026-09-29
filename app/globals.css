@@ -1281,6 +1281,110 @@ textarea:focus {
 }
 
 @media (max-width: 640px) {
+  .account-page {
+    padding: 8px 0 22px;
+  }
+
+  .account-page .breadcrumb {
+    display: none;
+  }
+
+  .account-page .container {
+    width: 100%;
+  }
+
+  .account-page .account-hero-card {
+    margin: 0;
+    padding: 18px 16px;
+    border: 0;
+    border-radius: 0 0 18px 18px;
+    background: linear-gradient(135deg, #1769d1, #3183e8);
+    color: #fff;
+    box-shadow: 0 6px 18px rgba(23, 105, 209, 0.16);
+  }
+
+  .account-page .account-hero-card h1 {
+    margin: 7px 0 3px;
+    font-size: 24px;
+    color: #fff;
+  }
+
+  .account-page .account-hero-card p {
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 11px;
+  }
+
+  .account-page .account-dashboard-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+    padding: 0 10px;
+  }
+
+  .account-page .account-dashboard-card {
+    padding: 15px;
+    border: 0;
+    border-radius: 14px;
+    box-shadow: 0 2px 10px rgba(27, 78, 131, 0.06);
+  }
+
+  .account-page .account-section-heading {
+    margin-bottom: 10px;
+  }
+
+  .account-page .account-section-heading h2 {
+    font-size: 16px;
+  }
+
+  .account-page .account-section-heading p,
+  .account-page .account-section-heading .section-link {
+    font-size: 10px;
+  }
+
+  .account-page .account-list {
+    gap: 0;
+  }
+
+  .account-page .account-list-row {
+    min-height: 48px;
+    padding: 10px 0;
+  }
+
+  .account-page .account-list-row strong {
+    display: block;
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  .account-page .account-list-detail {
+    font-size: 10px;
+  }
+
+  .account-page .account-list-link::after {
+    content: "›";
+    flex-shrink: 0;
+    color: #9aabba;
+    font-size: 20px;
+    line-height: 1;
+  }
+
+  .account-page .notification-toggle {
+    min-height: 42px;
+    padding: 0 10px;
+    border-radius: 10px;
+    background: #f5f8fc;
+  }
+
+  .account-page .notification-days select,
+  .account-page .password-change-form input {
+    min-height: 40px;
+  }
+
+  .account-page .password-change-form button {
+    min-height: 44px;
+  }
+
   body {
     padding-bottom: 70px;
   }
