@@ -2721,3 +2721,197 @@ textarea:focus {
     margin-top: 6px !important;
   }
 }
+
+
+/* Deadline maintenance */
+.deadline-admin-page {
+  padding-bottom: 60px;
+}
+
+.deadline-admin-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+
+.deadline-admin-header h1 {
+  margin: 9px 0 5px;
+  color: var(--blue-dark);
+}
+
+.deadline-admin-header p {
+  margin: 0;
+}
+
+.deadline-maintenance-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.deadline-maintenance-toolbar .primary {
+  white-space: nowrap;
+}
+
+.deadline-admin-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.deadline-stat {
+  padding: 15px 16px;
+}
+
+.deadline-stat strong {
+  display: block;
+  color: var(--blue);
+  font-size: 25px;
+  line-height: 1.1;
+}
+
+.deadline-stat span {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.deadline-candidate-list {
+  display: grid;
+  gap: 12px;
+}
+
+.deadline-candidate {
+  padding: 16px;
+}
+
+.deadline-candidate-main {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.deadline-candidate h2 {
+  margin: 5px 0 4px;
+  font-size: 17px;
+  line-height: 1.4;
+}
+
+.deadline-candidate-main p {
+  margin: 0;
+  font-size: 12px;
+}
+
+.deadline-candidate-actions {
+  display: flex;
+  gap: 7px;
+  flex-shrink: 0;
+}
+
+.deadline-candidate-detail {
+  display: grid;
+  grid-template-columns: 1fr 220px;
+  gap: 14px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.deadline-candidate-detail strong {
+  font-size: 11px;
+}
+
+.deadline-candidate-detail p {
+  margin: 4px 0 0;
+  font-size: 12px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.deadline-empty {
+  padding: 22px;
+}
+
+.deadline-empty p {
+  margin: 7px 0 0;
+}
+
+@media (max-width: 640px) {
+  .deadline-admin-page {
+    padding-bottom: 90px;
+  }
+
+  .deadline-admin-header {
+    display: block;
+    margin-bottom: 12px;
+  }
+
+  .deadline-admin-header h1 {
+    font-size: 25px;
+  }
+
+  .deadline-maintenance-toolbar {
+    display: grid;
+    margin-top: 12px;
+  }
+
+  .deadline-maintenance-toolbar .primary {
+    width: 100%;
+  }
+
+  .deadline-maintenance-toolbar .muted {
+    font-size: 11px;
+  }
+
+  .deadline-admin-summary {
+    gap: 8px;
+  }
+
+  .deadline-stat {
+    padding: 12px;
+  }
+
+  .deadline-stat strong {
+    font-size: 21px;
+  }
+
+  .deadline-stat span {
+    font-size: 10px;
+  }
+
+  .deadline-candidate {
+    padding: 13px;
+  }
+
+  .deadline-candidate-main {
+    display: block;
+  }
+
+  .deadline-candidate h2 {
+    font-size: 15px;
+  }
+
+  .deadline-candidate-actions {
+    display: grid;
+    grid-template-columns: 1fr 90px;
+    margin-top: 10px;
+  }
+
+  .deadline-candidate-actions button {
+    width: 100%;
+    min-height: 38px;
+    padding: 7px 8px;
+    font-size: 11px;
+  }
+
+  .deadline-candidate-detail {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
