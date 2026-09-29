@@ -200,6 +200,11 @@ export function Header() {
                 display: none;
               }
 
+              /* アカウント導線はスマホでは下部ナビに集約 */
+              .header-account {
+                display: none;
+              }
+
               .header-nav {
                 width: 100%;
                 display: flex;
