@@ -153,12 +153,8 @@ export function TournamentCard({
             ) : fallbackDeadline ? (
               <span>{fallbackDeadline}</span>
             ) : tournament.officialUrl && isHttpUrl(tournament.officialUrl) ? (
-              <a
-                href={tournament.officialUrl}
-                target="_blank"
-                rel="noreferrer"
-                onClick={(event) => event.stopPropagation()}
-                aria-label={tournament.name + "の公式サイトで締切を確認"}
+              <span
+                title="大会詳細ページから公式サイトを開いて締切を確認できます"
                 style={{
                   display: "inline-block",
                   border: "1px solid #cbdbea",
@@ -171,8 +167,8 @@ export function TournamentCard({
                   whiteSpace: "nowrap",
                 }}
               >
-                締切を公式で確認 ↗
-              </a>
+                締切は公式で確認
+              </span>
             ) : null}
           </div>
         </div>
