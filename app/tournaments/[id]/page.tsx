@@ -327,8 +327,18 @@ export default async function TournamentDetail({
                 </span>
 
                 <strong>
-                  {renderValue(
-                    tournament.deadline_text,
+                  {tournament.deadline_text?.trim() ? (
+                    tournament.deadline_text
+                  ) : hasOfficialUrl ? (
+                    <a
+                      className="text-link"
+                      href={officialUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      公式サイトで確認 ↗
+                    </a>
+                  ) : (
                     "要項を確認"
                   )}
                 </strong>
@@ -554,8 +564,18 @@ export default async function TournamentDetail({
                 </div>
 
                 <div>
-                  {renderValue(
-                    tournament.deadline_text,
+                  {tournament.deadline_text?.trim() ? (
+                    tournament.deadline_text
+                  ) : hasOfficialUrl ? (
+                    <a
+                      className="text-link"
+                      href={officialUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      公式サイトで確認 ↗
+                    </a>
+                  ) : (
                     "要項を確認"
                   )}
                 </div>
