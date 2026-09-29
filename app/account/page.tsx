@@ -193,6 +193,9 @@ export default async function AccountPage() {
             <Link className="primary" href="/tournaments">
               大会を探す
             </Link>
+            <Link className="outline-button" href="/admin/deadlines">
+              締切メンテナンス
+            </Link>
             <LogoutButton />
           </div>
         </section>
