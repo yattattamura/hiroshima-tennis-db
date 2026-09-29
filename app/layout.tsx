@@ -13,9 +13,9 @@ export const metadata: Metadata = {
 
   title: {
     default:
-      "KNOW NIS｜テニスを知る、もっとテニスが面白くなる",
+      "ノウニス｜テニスを知る、もっとテニスが面白くなる",
     template:
-      "%s | みんなで作る広島テニスポータル",
+      "%s | ノウニス",
   },
 
   description:
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     locale: "ja_JP",
     siteName: SITE_NAME,
     title:
-      "みんなで作る広島テニスポータル｜広島県のテニス大会検索",
+      "ノウニス｜テニスを知る、もっとテニスが面白くなる",
     description:
       SITE_DESCRIPTION,
     url: SITE_URL,
@@ -38,13 +38,13 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary",
     title:
-      "みんなで作る広島テニスポータル｜広島県のテニス大会検索",
+      "ノウニス｜テニスを知る、もっとテニスが面白くなる",
     description:
       SITE_DESCRIPTION,
   },
 
   icons: {
-    icon: "/favicon.ico",
+    icon: "/brand/know-nis-mark.svg",
   },
 };
 
