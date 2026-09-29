@@ -10,7 +10,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: SITE_NAME,
 
     short_name:
-      "広島テニスポータル",
+      "ノウニス",
 
     description:
       SITE_DESCRIPTION,
@@ -29,9 +29,9 @@ export default function manifest(): MetadataRoute.Manifest {
 
     icons: [
       {
-        src: "/favicon.ico",
+        src: "/brand/know-nis-mark.svg",
         sizes: "any",
-        type: "image/x-icon",
+        type: "image/svg+xml",
       },
     ],
   };
