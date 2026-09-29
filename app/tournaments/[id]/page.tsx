@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { RecentViewTracker } from "@/components/RecentViewTracker";
+import { formatTournamentVenue } from "@/lib/tournamentLocation";
 
 type Source = {
   id: string;
@@ -112,9 +113,10 @@ export default async function TournamentDetail({
   const qualificationTags =
     getQualificationTags(tournament);
 
-  const venue = tournament.venue_name_raw
-    ? `${tournament.city ?? ""}・${tournament.venue_name_raw}`
-    : renderValue(tournament.city);
+  const venue = formatTournamentVenue(
+    tournament.city,
+    tournament.venue_name_raw
+  );
 
   const officialUrl = renderValue(
     tournament.official_url,
