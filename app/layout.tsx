@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 
   title: {
     default:
-      "みんなで作る広島テニスポータル｜広島県のテニス大会検索",
+      "KNOW NIS｜テニスを知る、もっとテニスが面白くなる",
     template:
       "%s | みんなで作る広島テニスポータル",
   },
@@ -67,7 +67,7 @@ export default function RootLayout({
             <div className="site-footer-brand">
               <strong>{SITE_NAME}</strong>
               <div className="muted">
-                広島県の一般・社会人向けテニス大会情報ポータル
+                テニス大会を探せて、知って、選べるテニス情報サービス
               </div>
             </div>
 
