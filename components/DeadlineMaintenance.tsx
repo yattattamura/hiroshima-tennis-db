@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export function DeadlineMaintenance() {
   const [busy, setBusy] = useState(false);
@@ -56,7 +56,7 @@ export function DeadlineMaintenance() {
     }
   }
 
-  useState(() => {
+  useEffect(() => {
     const handler = (event: Event) => {
       const target = event.target as HTMLElement | null;
       const button = target?.closest<HTMLButtonElement>("button[data-deadline-action]");
