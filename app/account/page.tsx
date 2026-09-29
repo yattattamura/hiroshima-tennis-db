@@ -374,14 +374,6 @@ export default async function AccountPage() {
           </article>
         </section>
 
-        <div className="account-bottom-links">
-          <Link href="/about" className="section-link">
-            サイトについて
-          </Link>
-          <Link href="/contact" className="section-link">
-            お問い合わせ
-          </Link>
-        </div>
       </div>
     </div>
   );
