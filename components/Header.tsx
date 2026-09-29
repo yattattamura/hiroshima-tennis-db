@@ -20,10 +20,11 @@ export function Header() {
       }
     });
 
-    const { data: { subscription } } =
-      supabase.auth.onAuthStateChange((_event, session) => {
-        setUserEmail(session?.user?.email ?? null);
-      });
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUserEmail(session?.user?.email ?? null);
+    });
 
     return () => {
       mounted = false;
@@ -44,8 +45,14 @@ export function Header() {
       <header className="header">
         <div className="container header-inner">
           <div className="header-top">
-            <Link href="/" className="logo">
-              🎾 KNOW NIS
+            <Link href="/" className="logo" aria-label="ノウニス ホーム">
+              <img
+                src="/brand/know-nis-mark.svg"
+                alt=""
+                aria-hidden="true"
+                className="logo-mark"
+              />
+              <span>ノウニス</span>
             </Link>
 
             <div className="header-account">
@@ -59,7 +66,6 @@ export function Header() {
                 </Link>
               )}
             </div>
-
           </div>
 
           <nav className="header-nav">
@@ -223,9 +229,32 @@ export function Header() {
                 text-overflow: ellipsis;
               }
 
+              .logo-mark {
+                width: 26px;
+                height: 22px;
+                flex: 0 0 auto;
+              }
+
               .header-account-link {
                 font-size: 11px;
               }
+            }
+
+            .logo {
+              display: inline-flex;
+              align-items: center;
+              gap: 7px;
+              color: var(--blue);
+              font-weight: 800;
+              text-decoration: none;
+              letter-spacing: 0.01em;
+            }
+
+            .logo-mark {
+              width: 31px;
+              height: 24px;
+              object-fit: contain;
+              flex: 0 0 auto;
             }
           `,
         }}
