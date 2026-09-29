@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { fetchAndDetectDeadline } from "@/lib/deadlineDetector";
 
 export const dynamic = "force-dynamic";
@@ -35,7 +36,20 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const { supabase } = session;
+  const supabase = cronAuthorized
+    ? createSupabaseClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        { auth: { autoRefreshToken: false, persistSession: false } }
+      )
+    : session.supabase;
+
+  if (cronAuthorized && !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return NextResponse.json(
+      { error: "SUPABASE_SERVICE_ROLE_KEY is not configured" },
+      { status: 500 }
+    );
+  }
 
   const { data: tournaments, error } = await supabase
     .from("tournaments")
