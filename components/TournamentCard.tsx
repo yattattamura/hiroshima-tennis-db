@@ -3,6 +3,7 @@ import { FavoriteButton } from "@/components/FavoriteButton";
 import { Tournament } from "@/types/tournament";
 
 import { getTournamentDateInfo } from "@/lib/tournamentDate";
+import { resolveTournamentCity } from "@/lib/tournamentLocation";
 
 function getJapanToday(): string {
   const parts = new Intl.DateTimeFormat("en-US", {
@@ -68,6 +69,10 @@ function getDeadlineLabel(deadlineDate?: string): {
   return { label: "あと" + days + "日", tone: "normal" };
 }
 
+function isHttpUrl(value?: string): boolean {
+  return /^https?:\/\//i.test(value?.trim() ?? "");
+}
+
 export function TournamentCard({
   tournament,
 }: {
@@ -75,6 +80,10 @@ export function TournamentCard({
 }) {
   const shortDate = getTournamentDateInfo(tournament.date, tournament.startDate);
   const deadlineInfo = getDeadlineLabel(tournament.deadlineDate);
+  const resolvedCity = resolveTournamentCity(
+    tournament.city,
+    tournament.venue
+  );
 
   const fallbackDeadline =
     !deadlineInfo.label &&
@@ -124,7 +133,7 @@ export function TournamentCard({
           <h3>{tournament.name}</h3>
 
           <p className="muted tournament-location-v6">
-            📍 {tournament.city || "エリア未設定"}
+            📍 {resolvedCity || "エリア未設定"}
             {tournament.venue ? "・" + tournament.venue : ""}
           </p>
 
@@ -143,6 +152,27 @@ export function TournamentCard({
               </span>
             ) : fallbackDeadline ? (
               <span>{fallbackDeadline}</span>
+            ) : tournament.officialUrl && isHttpUrl(tournament.officialUrl) ? (
+              <a
+                href={tournament.officialUrl}
+                target="_blank"
+                rel="noreferrer"
+                onClick={(event) => event.stopPropagation()}
+                aria-label={tournament.name + "の公式サイトで締切を確認"}
+                style={{
+                  display: "inline-block",
+                  border: "1px solid #cbdbea",
+                  background: "#f6f9fc",
+                  color: "var(--blue)",
+                  borderRadius: 999,
+                  padding: "3px 8px",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                締切を公式で確認 ↗
+              </a>
             ) : null}
           </div>
         </div>
