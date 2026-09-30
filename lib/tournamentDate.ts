@@ -155,12 +155,11 @@ function formatScheduleItem(item: TournamentDate): string {
   const start = formatIsoDate(item.startDate);
   const end = item.endDate ? parseStartDate(item.endDate) : null;
 
-  if (!end || item.endDate === item.startDate) {
+  if (!end || !item.endDate || item.endDate === item.startDate) {
     return start;
   }
 
-  const endDate = item.endDate;
-  return `${start}～${formatIsoDate(endDate)}`;
+  return `${start}～${formatIsoDate(item.endDate)}`;
 }
 
 function sortScheduleDates(
