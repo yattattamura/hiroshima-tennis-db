@@ -4,7 +4,9 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { RecentViewTracker } from "@/components/RecentViewTracker";
-import { formatTournamentVenue } from "@/lib/tournamentLocation";\nimport { getTournamentScheduleInfo } from "@/lib/tournamentDate";\nimport type { TournamentDate } from "@/types/tournament";
+import { formatTournamentVenue } from "@/lib/tournamentLocation";
+import { getTournamentScheduleInfo } from "@/lib/tournamentDate";
+import type { TournamentDate } from "@/types/tournament";
 
 type Source = {
   id: string;
@@ -85,7 +87,7 @@ export default async function TournamentDetail({
   const [tournamentResult, sourcesResult] = await Promise.all([
     supabase
       .from("tournaments")
-      .select("*")
+      .select("*, tournament_dates(id, start_date, end_date, date_type, label, sort_order)")
       .eq("id", id)
       .single(),
     supabase
@@ -112,6 +114,23 @@ export default async function TournamentDetail({
 
   const qualificationTags =
     getQualificationTags(tournament);
+
+  const tournamentDates: TournamentDate[] = (tournament.tournament_dates ?? []).map(
+    (date: any) => ({
+      id: date.id,
+      startDate: date.start_date,
+      endDate: date.end_date,
+      dateType: date.date_type === "予備日" ? "予備日" : "開催日",
+      label: date.label,
+      sortOrder: date.sort_order ?? 0,
+    })
+  );
+
+  const schedule = getTournamentScheduleInfo(
+    tournament.date_text ?? "",
+    tournament.start_date ?? undefined,
+    tournamentDates
+  );
 
   const venue = formatTournamentVenue(
     tournament.city,
@@ -281,9 +300,12 @@ export default async function TournamentDetail({
                 </span>
 
                 <strong>
-                  {renderValue(
-                    tournament.date_text
-                  )}
+                  <span>{schedule.displayText}</span>
+                  {schedule.reserveText ? (
+                    <span className="detail-reserve-date" style={{ display: "block", marginTop: 4 }}>
+                      予備日 {schedule.reserveText}
+                    </span>
+                  ) : null}
                 </strong>
               </div>
 
