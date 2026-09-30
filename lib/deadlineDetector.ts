@@ -61,7 +61,7 @@ export function detectDeadline(
 
   // Japanese tournament sites use several equivalent labels.
   const keyword =
-    /(?:申込期日|申込期限|申込締切|申し込み締切|申し込み期限|エントリー締切|エントリー期限|受付締切|受付期限|締切|締め切り|期限|〆切)/i;
+    /(?:申込期日|申込期限|申込締切|申し込み締切|申し込み期限|エントリー締切|エントリー期限|受付締切|受付期限|締切|締め切り|期限|〆切)/gi;
 
   const matches = Array.from(text.matchAll(keyword));
 
