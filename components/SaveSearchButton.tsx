@@ -106,8 +106,9 @@ export function SaveSearchButton({
         className="outline-button"
         onClick={saveSearch}
         disabled={isSaving}
+        aria-busy={isSaving}
       >
-        {isSaving ? "保存中…" : "☆ 検索条件を保存"}
+        {isSaving ? (<> <span className="loading-spinner" aria-hidden="true" /> 保存中… </>) : "☆ 検索条件を保存"}
       </button>
 
       {message ? (
