@@ -50,6 +50,7 @@ export function FavoriteButton({
   const [isFavorite, setIsFavorite] = useState(false);
   const [isReady, setIsReady] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isToggling, setIsToggling] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -126,7 +127,8 @@ export function FavoriteButton({
   }, [tournamentId]);
 
   async function toggleFavorite() {
-    if (!isReady) return;
+    if (!isReady || isToggling) return;
+    setIsToggling(true);
 
     if (!isLoggedIn) {
       const favorites = readFavorites();
@@ -135,6 +137,7 @@ export function FavoriteButton({
         : [tournamentId, ...favorites];
       writeFavorites(next);
       setIsFavorite(next.includes(tournamentId));
+      setIsToggling(false);
       return;
     }
 
@@ -144,6 +147,7 @@ export function FavoriteButton({
 
     if (!user) {
       setIsLoggedIn(false);
+      setIsToggling(false);
       return;
     }
 
@@ -155,6 +159,7 @@ export function FavoriteButton({
         .eq("tournament_id", tournamentId);
 
       if (!error) setIsFavorite(false);
+      setIsToggling(false);
       return;
     }
 
@@ -164,14 +169,16 @@ export function FavoriteButton({
     });
 
     if (!error) setIsFavorite(true);
+    setIsToggling(false);
   }
 
   return (
     <button
       type="button"
       onClick={toggleFavorite}
-      disabled={!isReady}
+      disabled={!isReady || isToggling}
       aria-pressed={isFavorite}
+      aria-busy={isToggling}
       aria-label={isFavorite ? "お気に入りから削除" : "お気に入りに追加"}
       style={{
         display: "inline-flex",
@@ -190,8 +197,12 @@ export function FavoriteButton({
         fontSize: 13,
       }}
     >
-      <span aria-hidden="true">{isFavorite ? "★" : "☆"}</span>
-      {!compact && (isFavorite ? "お気に入り済み" : "お気に入り")}
+      {isToggling ? (
+        <span className="loading-spinner" aria-hidden="true" />
+      ) : (
+        <span aria-hidden="true">{isFavorite ? "★" : "☆"}</span>
+      )}
+      {!compact && (isToggling ? "更新中…" : isFavorite ? "お気に入り済み" : "お気に入り")}
     </button>
   );
 }
