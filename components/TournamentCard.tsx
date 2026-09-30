@@ -2,7 +2,7 @@ import Link from "next/link";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { Tournament } from "@/types/tournament";
 
-import { getTournamentDateInfo } from "@/lib/tournamentDate";
+import { getTournamentScheduleInfo } from "@/lib/tournamentDate";
 import { resolveTournamentCity } from "@/lib/tournamentLocation";
 
 function getJapanToday(): string {
@@ -78,7 +78,7 @@ export function TournamentCard({
 }: {
   tournament: Tournament;
 }) {
-  const shortDate = getTournamentDateInfo(tournament.date, tournament.startDate);
+  const schedule = getTournamentScheduleInfo(\n    tournament.date,\n    tournament.startDate,\n    tournament.tournamentDates\n  );
   const deadlineInfo = getDeadlineLabel(tournament.deadlineDate);
   const resolvedCity = resolveTournamentCity(
     tournament.city,
@@ -109,7 +109,7 @@ export function TournamentCard({
       >
         <div
           className="date-box date-box-v6"
-          aria-label={"開催日 " + tournament.date}
+          aria-label={"開催日 " + schedule.displayText + (schedule.reserveText ? "、" + schedule.reserveText : "")}
         >
           <strong>{shortDate.monthDay}</strong>
           {shortDate.weekday && (
