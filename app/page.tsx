@@ -3,7 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { TournamentCard } from "@/components/TournamentCard";
 import { SearchForm } from "@/components/SearchForm";
-import { Tournament } from "@/types/tournament";
+import { Tournament } from "@/types/tournament";\nimport type { TournamentDate } from "@/types/tournament";
 
 type SearchTournamentRow = {
   id: string;
