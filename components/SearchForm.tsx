@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 type SearchValues = {
@@ -32,7 +32,7 @@ export function SearchForm({
   const [collapsed, setCollapsed] = useState(
     collapsible && initiallyCollapsed
   );
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const hasAdvancedFilters = Boolean(
     initialValues.gender ||
       initialValues.eligibility ||
@@ -41,8 +41,7 @@ export function SearchForm({
 
   const submit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (isSubmitting) return;
-    setIsSubmitting(true);
+    if (isPending) return;
 
     const form = new FormData(e.currentTarget);
     const qs = new URLSearchParams();
@@ -64,11 +63,13 @@ export function SearchForm({
 
     const queryString = qs.toString();
 
-    router.push(
-      queryString
-        ? "/tournaments?" + queryString
-        : "/tournaments"
-    );
+    startTransition(() => {
+      router.push(
+        queryString
+          ? "/tournaments?" + queryString
+          : "/tournaments"
+      );
+    });
   };
 
   return (
@@ -86,7 +87,7 @@ export function SearchForm({
             className="search-panel-toggle"
             onClick={() => setCollapsed((value) => !value)}
             aria-expanded={!collapsed}
-            disabled={isSubmitting}
+            disabled={isPending}
           >
             {collapsed ? "条件を変更" : "閉じる"}
           </button>
@@ -103,7 +104,7 @@ export function SearchForm({
       {!collapsed && (
         <fieldset
           disabled={isSubmitting}
-          aria-busy={isSubmitting}
+          aria-busy={isPending}
           style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}
         >
       <div className="search-primary-grid">
@@ -262,9 +263,9 @@ export function SearchForm({
         className="primary search-button"
         type="submit"
         disabled={isSubmitting}
-        aria-busy={isSubmitting}
+        aria-busy={isPending}
       >
-        {isSubmitting ? (
+        {isPending ? (
           <>
             <span className="loading-spinner" aria-hidden="true" />
             検索中…
