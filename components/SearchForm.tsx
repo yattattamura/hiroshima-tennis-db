@@ -103,7 +103,7 @@ export function SearchForm({
 
       {!collapsed && (
         <fieldset
-          disabled={isSubmitting}
+          disabled={isPending}
           aria-busy={isPending}
           style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}
         >
@@ -262,7 +262,7 @@ export function SearchForm({
       <button
         className="primary search-button"
         type="submit"
-        disabled={isSubmitting}
+        disabled={isPending}
         aria-busy={isPending}
       >
         {isPending ? (
