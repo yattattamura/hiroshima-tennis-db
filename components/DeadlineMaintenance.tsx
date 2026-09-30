@@ -75,8 +75,10 @@ export function DeadlineMaintenance() {
 
   return (
     <div className="deadline-maintenance-toolbar">
-      <button className="primary" onClick={scan} disabled={busy}>
-        {busy ? "処理中…" : "🔎 自動検出を実行"}
+      <button className="primary" onClick={scan} disabled={busy} aria-busy={busy}>
+        {busy ? (
+          <><span className="loading-spinner" aria-hidden="true" /> 処理中…</>
+        ) : "🔎 自動検出を実行"}
       </button>
       {message ? <span className="muted">{message}</span> : null}
     </div>
