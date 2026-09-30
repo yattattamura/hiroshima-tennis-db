@@ -32,6 +32,7 @@ export function SearchForm({
   const [collapsed, setCollapsed] = useState(
     collapsible && initiallyCollapsed
   );
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const hasAdvancedFilters = Boolean(
     initialValues.gender ||
       initialValues.eligibility ||
@@ -40,6 +41,8 @@ export function SearchForm({
 
   const submit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    setIsSubmitting(true);
 
     const form = new FormData(e.currentTarget);
     const qs = new URLSearchParams();
@@ -83,6 +86,7 @@ export function SearchForm({
             className="search-panel-toggle"
             onClick={() => setCollapsed((value) => !value)}
             aria-expanded={!collapsed}
+            disabled={isSubmitting}
           >
             {collapsed ? "条件を変更" : "閉じる"}
           </button>
@@ -97,7 +101,11 @@ export function SearchForm({
       )}
 
       {!collapsed && (
-        <>
+        <fieldset
+          disabled={isSubmitting}
+          aria-busy={isSubmitting}
+          style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}
+        >
       <div className="search-primary-grid">
         <label className="search-keyword-field">
           <span>キーワード</span>
@@ -250,10 +258,22 @@ export function SearchForm({
         </div>
       </details>
 
-      <button className="primary search-button" type="submit">
-        🔎 検索する
+      <button
+        className="primary search-button"
+        type="submit"
+        disabled={isSubmitting}
+        aria-busy={isSubmitting}
+      >
+        {isSubmitting ? (
+          <>
+            <span className="loading-spinner" aria-hidden="true" />
+            検索中…
+          </>
+        ) : (
+          "🔎 検索する"
+        )}
       </button>
-        </>
+        </fieldset>
       )}
     </form>
   );
