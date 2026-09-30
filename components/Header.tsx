@@ -152,6 +152,18 @@ export function Header() {
               white-space: nowrap;
             }
 
+            @media (max-width: 700px) {
+              .header-account-link {
+                display: inline-flex;
+                align-items: center;
+                min-height: 34px;
+                padding: 0 10px;
+                border: 1px solid var(--border);
+                border-radius: 999px;
+                background: #fff;
+              }
+            }
+
             .header-nav a.active {
               color: var(--blue);
               font-weight: 800;
@@ -200,9 +212,9 @@ export function Header() {
                 display: none;
               }
 
-              /* アカウント導線はスマホでは下部ナビに集約 */
+              /* マイページはヘッダーにも残して、下部ナビ以外からも到達できるようにする */
               .header-account {
-                display: none;
+                display: block;
               }
 
               .header-nav {
