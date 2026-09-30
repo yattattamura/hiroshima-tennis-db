@@ -1,4 +1,6 @@
-import type { TournamentDate } from "@/types/tournament";\n\nconst WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"] as const;
+import type { TournamentDate } from "@/types/tournament";
+
+const WEEKDAYS = ["日", "月", "火", "水", "木", "金", "土"] as const;
 
 export type TournamentDateInfo = {
   monthDay: string;
@@ -136,8 +138,6 @@ export function getTournamentDateInfo(
   };
 }
 
-
-import type { TournamentDate } from "@/types/tournament";
 
 function formatIsoDate(value: string, includeWeekday = true): string {
   const parsed = parseStartDate(value);
