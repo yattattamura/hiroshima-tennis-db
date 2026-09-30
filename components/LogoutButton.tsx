@@ -22,8 +22,9 @@ export function LogoutButton() {
       type="button"
       onClick={handleLogout}
       disabled={isSubmitting}
+      aria-busy={isSubmitting}
     >
-      {isSubmitting ? "ログアウト中…" : "ログアウト"}
+      {isSubmitting ? (<> <span className="loading-spinner" aria-hidden="true" /> ログアウト中… </>) : "ログアウト"}
     </button>
   );
 }
