@@ -3,7 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { TournamentCard } from "@/components/TournamentCard";
 import { SearchForm } from "@/components/SearchForm";
-import { Tournament } from "@/types/tournament";\nimport type { TournamentDate } from "@/types/tournament";
+import { Tournament, TournamentDate } from "@/types/tournament";
 
 type SearchTournamentRow = {
   id: string;
@@ -30,6 +30,14 @@ type SearchTournamentRow = {
   other_city_allowed: string | null;
   age_condition: string | null;
   search_tokens: string | null;
+  tournament_dates?: Array<{
+    id: string;
+    start_date: string;
+    end_date: string | null;
+    date_type: string;
+    label: string | null;
+    sort_order: number;
+  }>;
 };
 
 function getJapanToday(): string {
@@ -56,12 +64,22 @@ function getJapanToday(): string {
 }
 
 function convertTournament(row: SearchTournamentRow): Tournament {
+  const tournamentDates: TournamentDate[] = (row.tournament_dates ?? []).map((date) => ({
+    id: date.id,
+    startDate: date.start_date,
+    endDate: date.end_date,
+    dateType: date.date_type === "予備日" ? "予備日" : "開催日",
+    label: date.label,
+    sortOrder: date.sort_order ?? 0,
+  }));
+
   return {
     id: row.id,
     name: row.name,
     organizer: row.organizer_name_raw ?? "",
     date: row.date_text ?? "",
     startDate: row.start_date ?? undefined,
+    tournamentDates,
     city: row.city ?? "",
     venue: row.venue_name_raw ?? "",
     eventType: row.event_type ?? "",
@@ -104,7 +122,7 @@ export default async function Home() {
   ] = await Promise.all([
     supabase
       .from("tournaments")
-      .select("*")
+      .select("*, tournament_dates(id, start_date, end_date, date_type, label, sort_order)")
       .gte("start_date", today)
       .order("start_date", {
         ascending: true,
