@@ -36,7 +36,9 @@ function toIsoDate(year: number, month: number, day: number): string | null {
 
 function parseDate(value: string, fallbackYear: number): string | null {
   const normalized = value
-    .replace(/[０-９]/g, (char) => String.fromCharCode(char.charCodeAt(0) - 0xfee0))
+    .replace(/[０-９]/g, (char) =>
+      String.fromCharCode(char.charCodeAt(0) - 0xfee0)
+    )
     .replace(/\s+/g, "");
 
   const match = normalized.match(
@@ -56,41 +58,68 @@ export function detectDeadline(
   eventStartDate?: string | null
 ): DeadlineDetection {
   const text = normalizeText(html);
+
+  // Japanese tournament sites use several equivalent labels.
   const keyword =
-    /(?:申込|申し込み|受付|募集|エントリー)?(?:締切|締め切り|期限|〆切)/i;
+    /(?:申込期日|申込期限|申込締切|申し込み締切|申し込み期限|エントリー締切|エントリー期限|受付締切|受付期限|締切|締め切り|期限|〆切)/i;
 
   const matches = Array.from(text.matchAll(keyword));
+
   for (const match of matches) {
     const index = match.index ?? -1;
     if (index < 0) continue;
 
-    const excerpt = text.slice(Math.max(0, index - 30), index + 140);
+    const excerpt = text.slice(Math.max(0, index - 80), index + 180);
     const dateMatches = Array.from(
       excerpt.matchAll(
         /(?:(?:20\d{2})年?\s*)?\d{1,2}(?:月|[./-])\d{1,2}日?/g
       )
     );
 
-    for (const dateMatch of dateMatches) {
-      const raw = dateMatch[0];
-      const date = parseDate(raw, fallbackYear);
-      if (!date) continue;
+    const candidates = dateMatches
+      .map((dateMatch) => {
+        const date = parseDate(dateMatch[0], fallbackYear);
+        if (!date) return null;
 
-      if (eventStartDate && date > eventStartDate) continue;
+        const absoluteIndex = Math.max(0, index - 80) + (dateMatch.index ?? 0);
+        return {
+          date,
+          raw: dateMatch[0],
+          distance: Math.abs(absoluteIndex - index),
+          isAfterKeyword: absoluteIndex >= index,
+        };
+      })
+      .filter(
+        (candidate): candidate is {
+          date: string;
+          raw: string;
+          distance: number;
+          isAfterKeyword: boolean;
+        } => Boolean(candidate)
+      )
+      .filter((candidate) => !eventStartDate || candidate.date <= eventStartDate)
+      .sort((a, b) => {
+        // In tables such as "申込期日 | 3/4", prefer the date immediately
+        // after the keyword. Otherwise choose the nearest date.
+        if (a.isAfterKeyword !== b.isAfterKeyword) {
+          return a.isAfterKeyword ? -1 : 1;
+        }
+        return a.distance - b.distance;
+      });
 
-      const confidence = /20\d{2}/.test(raw)
-        ? 96
-        : /(?:申込|受付|募集|エントリー)/.test(match[0])
-          ? 90
-          : 82;
+    const candidate = candidates[0];
+    if (!candidate) continue;
 
-      return {
-        date,
-        text: raw,
-        excerpt,
-        confidence,
-      };
-    }
+    const confidence = /20\d{2}/.test(candidate.raw)
+      ? 96
+      : 92;
+
+    return {
+      date: candidate.date,
+      text: candidate.raw,
+      excerpt,
+      confidence,
+    };
   }
 
   return {
@@ -113,14 +142,28 @@ export async function fetchAndDetectDeadline(
     const response = await fetch(url, {
       signal: controller.signal,
       headers: {
-        "User-Agent": "KnowNisDeadlineBot/1.0 (+https://hiroshima-tennis-db-xzcj-delta.vercel.app)",
-        Accept: "text/html,application/xhtml+xml",
+        "User-Agent":
+          "KnowNisDeadlineBot/1.0 (+https://hiroshima-tennis-db-xzcj-delta.vercel.app)",
+        Accept: "text/html,application/xhtml+xml,application/pdf",
       },
       cache: "no-store",
     });
 
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
+    }
+
+    const contentType = response.headers.get("content-type") ?? "";
+
+    // PDF parsing is intentionally not attempted yet. Treating a PDF as HTML
+    // produces unreliable results, so leave it for the dedicated PDF phase.
+    if (contentType.includes("application/pdf") || url.toLowerCase().includes(".pdf")) {
+      return {
+        date: null,
+        text: null,
+        excerpt: "PDF形式の公式資料です。PDF自動解析は次の対応フェーズで追加します。",
+        confidence: 0,
+      };
     }
 
     const html = await response.text();
