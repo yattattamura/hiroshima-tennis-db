@@ -29,8 +29,11 @@ export function SavedSearchList({
 }) {
   const router = useRouter();
   const [items, setItems] = useState(initialItems);
+  const [removingId, setRemovingId] = useState<string | null>(null);
 
   async function remove(id: string) {
+    if (removingId) return;
+    setRemovingId(id);
     const { error } = await supabase
       .from("saved_searches")
       .delete()
@@ -42,6 +45,7 @@ export function SavedSearchList({
       );
       router.refresh();
     }
+    setRemovingId(null);
   }
 
   if (items.length === 0) {
@@ -71,8 +75,10 @@ export function SavedSearchList({
               className="link-button"
               type="button"
               onClick={() => void remove(item.id)}
+              disabled={removingId === item.id}
+              aria-busy={removingId === item.id}
             >
-              削除
+              {removingId === item.id ? "削除中…" : "削除"}
             </button>
           </div>
         </div>
