@@ -159,7 +159,8 @@ function formatScheduleItem(item: TournamentDate): string {
     return start;
   }
 
-  return `${start}～${formatIsoDate(item.endDate)}`;
+  const endDate = item.endDate;
+  return `${start}～${formatIsoDate(endDate)}`;
 }
 
 function sortScheduleDates(
