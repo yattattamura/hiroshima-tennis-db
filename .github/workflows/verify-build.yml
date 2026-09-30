@@ -5,6 +5,10 @@ on:
     branches: [main]
   workflow_dispatch:
 
+env:
+  NEXT_PUBLIC_SUPABASE_URL: https://ijivgcjnwmroesnfhyct.supabase.co
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_JMQFV9FOsetw5jX4EBP5QA_qLpoOz-E
+
 jobs:
   build:
     runs-on: ubuntu-latest
