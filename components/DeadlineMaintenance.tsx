@@ -1,10 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export function DeadlineMaintenance() {
   const [busy, setBusy] = useState(false);
+  const router = useRouter();
   const [message, setMessage] = useState("");
+  const [errors, setErrors] = useState<Array<{ name: string; error: string }>>([]);
 
   async function scan() {
     setBusy(true);
@@ -23,7 +26,8 @@ export function DeadlineMaintenance() {
       setMessage(
         `確認 ${result.scanned}件 / 候補検出 ${result.detected}件 / エラー ${result.failed}件`
       );
-      window.location.reload();
+      setErrors(Array.isArray(result.errors) ? result.errors : []);
+      router.refresh();
     } catch (error) {
       setMessage(
         error instanceof Error ? error.message : "自動検出に失敗しました"
@@ -81,6 +85,19 @@ export function DeadlineMaintenance() {
         ) : "🔎 自動検出を実行"}
       </button>
       {message ? <span className="muted">{message}</span> : null}
+      {errors.length > 0 ? (
+        <div className="deadline-maintenance-errors" role="alert">
+          <strong>検出エラーの詳細</strong>
+          <ul>
+            {errors.slice(0, 10).map((item) => (
+              <li key={`${item.name}-${item.error}`}>
+                <span>{item.name}</span>：{item.error}
+              </li>
+            ))}
+          </ul>
+          {errors.length > 10 ? <p>ほか {errors.length - 10}件</p> : null}
+        </div>
+      ) : null}
     </div>
   );
 }
