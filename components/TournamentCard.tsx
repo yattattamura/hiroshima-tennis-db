@@ -78,7 +78,11 @@ export function TournamentCard({
 }: {
   tournament: Tournament;
 }) {
-  const schedule = getTournamentScheduleInfo(\n    tournament.date,\n    tournament.startDate,\n    tournament.tournamentDates\n  );
+  const schedule = getTournamentScheduleInfo(
+    tournament.date,
+    tournament.startDate,
+    tournament.tournamentDates
+  );
   const deadlineInfo = getDeadlineLabel(tournament.deadlineDate);
   const resolvedCity = resolveTournamentCity(
     tournament.city,
@@ -111,10 +115,10 @@ export function TournamentCard({
           className="date-box date-box-v6"
           aria-label={"開催日 " + schedule.displayText + (schedule.reserveText ? "、" + schedule.reserveText : "")}
         >
-          <strong>{shortDate.monthDay}</strong>
-          {shortDate.weekday && (
-            <span className="date-weekday" aria-label={"曜日 " + shortDate.weekday}>
-              {shortDate.weekday}
+          <strong>{schedule.primary.monthDay}</strong>
+          {schedule.primary.weekday && (
+            <span className="date-weekday" aria-label={"曜日 " + schedule.primary.weekday}>
+              {schedule.primary.weekday}
             </span>
           )}
         </div>
@@ -131,6 +135,17 @@ export function TournamentCard({
           </div>
 
           <h3>{tournament.name}</h3>
+
+          {schedule.hasDetails ? (
+            <p className="muted tournament-schedule-v6">
+              {schedule.displayText !== "日程未設定" ? (
+                <span>開催 {schedule.displayText}</span>
+              ) : null}
+              {schedule.reserveText ? (
+                <span>予備日 {schedule.reserveText}</span>
+              ) : null}
+            </p>
+          ) : null}
 
           <p className="muted tournament-location-v6">
             📍 {resolvedCity || "エリア未設定"}
