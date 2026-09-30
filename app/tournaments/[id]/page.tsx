@@ -506,9 +506,14 @@ export default async function TournamentDetail({
                 </div>
 
                 <div>
-                  {renderValue(
-                    tournament.date_text
-                  )}
+                  <div className="detail-schedule-stack">
+                    <span>{schedule.displayText}</span>
+                    {schedule.reserveText ? (
+                      <span className="detail-reserve-date">
+                        予備日 {schedule.reserveText}
+                      </span>
+                    ) : null}
+                  </div>
                 </div>
 
                 <div>
