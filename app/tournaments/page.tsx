@@ -5,7 +5,8 @@ import { SearchForm } from "@/components/SearchForm";
 import { TournamentCard } from "@/components/TournamentCard";
 import { Tournament } from "@/types/tournament";
 import { SaveSearchButton } from "@/components/SaveSearchButton";
-import { resolveTournamentCity } from "@/lib/tournamentLocation";\nimport type { TournamentDate } from "@/types/tournament";
+import { resolveTournamentCity } from "@/lib/tournamentLocation";
+import type { TournamentDate } from "@/types/tournament";
 
 type SearchParams = {
   period?: string;
@@ -53,6 +54,14 @@ function convertTournament(row: any): Tournament {
     organizer: row.organizer_name_raw ?? "",
     date: row.date_text ?? "",
     startDate: row.start_date ?? undefined,
+    tournamentDates: (row.tournament_dates ?? []).map((date: any) => ({
+      id: date.id,
+      startDate: date.start_date,
+      endDate: date.end_date,
+      dateType: date.date_type === "予備日" ? "予備日" : "開催日",
+      label: date.label,
+      sortOrder: date.sort_order ?? 0,
+    })),
     city: resolveTournamentCity(row.city, row.venue_name_raw),
     venue: row.venue_name_raw ?? "",
     eventType: row.event_type ?? "",
@@ -169,7 +178,7 @@ export default async function TournamentsPage({
 
   let query = supabase
     .from("tournaments")
-    .select("*", { count: "exact" })
+    .select("*, tournament_dates(id, start_date, end_date, date_type, label, sort_order)", { count: "exact" })
     .order("start_date", {
       ascending: true,
       nullsFirst: false,
