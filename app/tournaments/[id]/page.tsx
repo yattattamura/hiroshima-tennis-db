@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { FavoriteButton } from "@/components/FavoriteButton";
 import { RecentViewTracker } from "@/components/RecentViewTracker";
-import { formatTournamentVenue } from "@/lib/tournamentLocation";
+import { formatTournamentVenue } from "@/lib/tournamentLocation";\nimport { getTournamentScheduleInfo } from "@/lib/tournamentDate";\nimport type { TournamentDate } from "@/types/tournament";
 
 type Source = {
   id: string;
