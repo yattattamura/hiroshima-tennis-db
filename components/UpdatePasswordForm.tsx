@@ -129,8 +129,8 @@ export function UpdatePasswordForm() {
           </p>
         ) : null}
 
-        <button className="primary" type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "変更中…" : "パスワードを変更"}
+        <button className="primary" type="submit" disabled={isSubmitting} aria-busy={isSubmitting}>
+          {isSubmitting ? (<> <span className="loading-spinner" aria-hidden="true" /> 変更中… </>) : "パスワードを変更"}
         </button>
       </form>
 
