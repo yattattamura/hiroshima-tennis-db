@@ -87,9 +87,11 @@ export function NotificationSettings({
         </select>
       </label>
 
-      {message ? (
-        <span className="save-search-message" role="status">
-          {message}
+      {saving || message ? (
+        <span className="save-search-message" role="status" aria-busy={saving}>
+          {saving ? (
+            <><span className="loading-spinner" aria-hidden="true" /> 保存中…</>
+          ) : message}
         </span>
       ) : null}
     </div>
