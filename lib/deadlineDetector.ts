@@ -139,18 +139,51 @@ export async function fetchAndDetectDeadline(
   const timer = setTimeout(() => controller.abort(), 8000);
 
   try {
-    const response = await fetch(url, {
+    // Some tournament sites reject server-side crawlers with HTTP 403 even
+    // though the same page is publicly accessible in a normal browser.
+    // Try the crawler identity first, then retry once with browser-like
+    // navigation headers. Keep the retry bounded by the same timeout.
+    const crawlerHeaders = {
+      "User-Agent":
+        "KnowNisDeadlineBot/1.0 (+https://hiroshima-tennis-db-xzcj-delta.vercel.app)",
+      Accept: "text/html,application/xhtml+xml,application/pdf",
+    };
+
+    const browserHeaders = {
+      "User-Agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+      Accept:
+        "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+      "Accept-Language": "ja,en-US;q=0.9,en;q=0.8",
+      "Upgrade-Insecure-Requests": "1",
+      "Sec-Fetch-Dest": "document",
+      "Sec-Fetch-Mode": "navigate",
+      "Sec-Fetch-Site": "none",
+      "Sec-Fetch-User": "?1",
+    };
+
+    let response = await fetch(url, {
       signal: controller.signal,
-      headers: {
-        "User-Agent":
-          "KnowNisDeadlineBot/1.0 (+https://hiroshima-tennis-db-xzcj-delta.vercel.app)",
-        Accept: "text/html,application/xhtml+xml,application/pdf",
-      },
+      headers: crawlerHeaders,
       cache: "no-store",
     });
 
+    if (response.status === 403) {
+      await response.body?.cancel();
+
+      response = await fetch(url, {
+        signal: controller.signal,
+        headers: browserHeaders,
+        cache: "no-store",
+      });
+    }
+
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
+      const detail =
+        response.status === 403
+          ? "HTTP 403（ブラウザ偽装でもアクセス拒否）"
+          : `HTTP ${response.status}`;
+      throw new Error(detail);
     }
 
     const contentType = response.headers.get("content-type") ?? "";
