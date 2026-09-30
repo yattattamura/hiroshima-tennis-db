@@ -5,13 +5,13 @@ import { fetchAndDetectDeadline } from "@/lib/deadlineDetector";
 
 export const dynamic = "force-dynamic";
 
-async function isAdmin() {
+async function getAdminSession() {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) return { supabase, user: null, admin: false };
+  if (!user) return { user: null, admin: false };
 
   const { data: admin } = await supabase
     .from("admin_users")
@@ -19,32 +19,44 @@ async function isAdmin() {
     .eq("user_id", user.id)
     .maybeSingle();
 
-  return { supabase, user, admin: Boolean(admin) };
+  return { user, admin: Boolean(admin) };
 }
 
 function authorizedByCron(request: Request): boolean {
   const secret = process.env.CRON_SECRET;
-  if (!secret) return false;
-  return request.headers.get("authorization") === `Bearer ${secret}`;
+  return Boolean(secret) && request.headers.get("authorization") === `Bearer ${secret}`;
+}
+
+function getServiceRoleClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!url || !key) return null;
+
+  return createSupabaseClient(url, key, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
 }
 
 export async function POST(request: Request) {
   const cronAuthorized = authorizedByCron(request);
-  const session = await isAdmin();
 
-  if (!cronAuthorized && !session.admin) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  // Cron requests are already authenticated by CRON_SECRET.
+  // Manual scans still require an authenticated admin.
+  if (!cronAuthorized) {
+    const session = await getAdminSession();
+    if (!session.admin) {
+      return NextResponse.json(
+        { error: session.user ? "Forbidden" : "Unauthorized" },
+        { status: session.user ? 403 : 401 }
+      );
+    }
   }
 
-  const supabase = cronAuthorized
-    ? createSupabaseClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!,
-        { auth: { autoRefreshToken: false, persistSession: false } }
-      )
-    : session.supabase;
-
-  if (cronAuthorized && !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  // Use the service-role client for the scan itself. This avoids RLS blocking
+  // the maintenance job while keeping the service key server-side only.
+  const supabase = getServiceRoleClient();
+  if (!supabase) {
     return NextResponse.json(
       { error: "SUPABASE_SERVICE_ROLE_KEY is not configured" },
       { status: 500 }
@@ -64,9 +76,9 @@ export async function POST(request: Request) {
   }
 
   let detected = 0;
-  let failed = 0;
+  const errors: Array<{ tournamentId: string; name: string; error: string }> = [];
 
-  const results = await Promise.allSettled(
+  const results = await Promise.all(
     (tournaments ?? []).map(async (tournament) => {
       const fallbackYear = tournament.start_date
         ? Number(String(tournament.start_date).slice(0, 4))
@@ -99,32 +111,34 @@ export async function POST(request: Request) {
 
         if (candidateError) throw candidateError;
 
-        await supabase
-          .from("tournaments")
-          .update({ last_checked_at: new Date().toISOString() })
-          .eq("id", tournament.id);
-
         if (result.date) detected += 1;
+
+        return { ok: true };
       } catch (scanError) {
-        failed += 1;
+        const message =
+          scanError instanceof Error ? scanError.message : String(scanError);
+
+        errors.push({
+          tournamentId: tournament.id,
+          name: tournament.name,
+          error: message,
+        });
+
+        return { ok: false };
+      } finally {
         await supabase
           .from("tournaments")
           .update({ last_checked_at: new Date().toISOString() })
           .eq("id", tournament.id);
-
-        throw scanError;
       }
     })
   );
 
-  for (const result of results) {
-    if (result.status === "rejected") failed += 0;
-  }
-
   return NextResponse.json({
     scanned: tournaments?.length ?? 0,
     detected,
-    failed,
+    failed: results.filter((result) => !result.ok).length,
+    errors,
     message:
       (tournaments?.length ?? 0) === 0
         ? "対象大会はありません"
