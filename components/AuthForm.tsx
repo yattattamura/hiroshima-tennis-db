@@ -146,12 +146,11 @@ export function AuthForm({ mode, nextPath = "/account" }: AuthFormProps) {
           className="primary"
           type="submit"
           disabled={isSubmitting}
+          aria-busy={isSubmitting}
         >
-          {isSubmitting
-            ? "処理中…"
-            : isSignup
-              ? "アカウントを作成"
-              : "ログイン"}
+          {isSubmitting ? (
+            <><span className="loading-spinner" aria-hidden="true" /> 処理中…</>
+          ) : isSignup ? "アカウントを作成" : "ログイン"}
         </button>
       </form>
 
