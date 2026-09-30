@@ -113,8 +113,8 @@ export function PasswordChangeForm() {
         </p>
       ) : null}
 
-      <button className="primary" type="submit" disabled={saving}>
-        {saving ? "変更中…" : "パスワードを変更"}
+      <button className="primary" type="submit" disabled={saving} aria-busy={saving}>
+        {saving ? (<> <span className="loading-spinner" aria-hidden="true" /> 変更中… </>) : "パスワードを変更"}
       </button>
     </form>
   );
