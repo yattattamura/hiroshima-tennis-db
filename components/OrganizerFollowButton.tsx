@@ -14,6 +14,7 @@ export function OrganizerFollowButton({
   const [isFollowing, setIsFollowing] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [ready, setReady] = useState(false);
+  const [isToggling, setIsToggling] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -53,11 +54,17 @@ export function OrganizerFollowButton({
   }, [organizerId]);
 
   async function toggle() {
+    if (!ready || isToggling) return;
+    setIsToggling(true);
+
     const {
       data: { user },
     } = await supabase.auth.getUser();
 
-    if (!user) return;
+    if (!user) {
+      setIsToggling(false);
+      return;
+    }
 
     if (isFollowing) {
       const { error } = await supabase
@@ -67,6 +74,7 @@ export function OrganizerFollowButton({
         .eq("organizer_id", organizerId);
 
       if (!error) setIsFollowing(false);
+      setIsToggling(false);
       return;
     }
 
@@ -76,6 +84,7 @@ export function OrganizerFollowButton({
     });
 
     if (!error) setIsFollowing(true);
+    setIsToggling(false);
   }
 
   if (!ready) {
@@ -105,9 +114,16 @@ export function OrganizerFollowButton({
       type="button"
       className={isFollowing ? "primary" : "outline-button"}
       onClick={toggle}
+      disabled={isToggling}
       aria-pressed={isFollowing}
+      aria-busy={isToggling}
     >
-      {isFollowing ? "✓ フォロー中" : "☆ フォローする"}
+      {isToggling ? (
+        <>
+          <span className="loading-spinner" aria-hidden="true" />
+          更新中…
+        </>
+      ) : isFollowing ? "✓ フォロー中" : "☆ フォローする"}
     </button>
   );
 }
