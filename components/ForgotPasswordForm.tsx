@@ -80,8 +80,8 @@ export function ForgotPasswordForm() {
           </p>
         ) : null}
 
-        <button className="primary" type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "送信中…" : "再設定メールを送信"}
+        <button className="primary" type="submit" disabled={isSubmitting} aria-busy={isSubmitting}>
+          {isSubmitting ? (<> <span className="loading-spinner" aria-hidden="true" /> 送信中… </>) : "再設定メールを送信"}
         </button>
       </form>
 
