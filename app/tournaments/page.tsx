@@ -5,7 +5,7 @@ import { SearchForm } from "@/components/SearchForm";
 import { TournamentCard } from "@/components/TournamentCard";
 import { Tournament } from "@/types/tournament";
 import { SaveSearchButton } from "@/components/SaveSearchButton";
-import { resolveTournamentCity } from "@/lib/tournamentLocation";
+import { resolveTournamentCity } from "@/lib/tournamentLocation";\nimport type { TournamentDate } from "@/types/tournament";
 
 type SearchParams = {
   period?: string;
