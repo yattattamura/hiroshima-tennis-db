@@ -166,19 +166,12 @@ export default async function TournamentsPage({
 }) {
   const params = await searchParams;
 
-  const hasExplicitSearchParams = Object.entries(params).some(
-    ([key, value]) =>
-      key !== "page" &&
-      typeof value === "string" &&
-      value.trim() !== ""
-  );
-
   const supabase = await createClient();
 
   let profilePrefecture = "";
   let profileCity = "";
 
-  if (!routePrefecture && !hasExplicitSearchParams) {
+  if (!routePrefecture && (!params.prefecture || !params.city)) {
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -197,7 +190,9 @@ export default async function TournamentsPage({
 
   const prefecture = routePrefecture ?? params.prefecture ?? profilePrefecture;
   const period = params.period ?? "all";
-  const city = params.city ?? profileCity;
+  const city =
+    params.city ??
+    (profilePrefecture === prefecture ? profileCity : "");
   const eventType = params.eventType ?? "";
   const gender = params.gender ?? "";
   const level = params.level ?? "";
