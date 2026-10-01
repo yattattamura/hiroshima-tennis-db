@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 const COOKIE_NAME = "htdb_favorites";
-const MAX_FAVORITES = 100;
+const MAX_FAVORITES = 50;
 const supabase = createClient();
 
 function readFavorites(): string[] {
@@ -51,6 +51,7 @@ export function FavoriteButton({
   const [isReady, setIsReady] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isToggling, setIsToggling] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     let mounted = true;
@@ -129,12 +130,23 @@ export function FavoriteButton({
   async function toggleFavorite() {
     if (!isReady || isToggling) return;
     setIsToggling(true);
+    setErrorMessage("");
 
     if (!isLoggedIn) {
       const favorites = readFavorites();
+
+      if (!favorites.includes(tournamentId) && favorites.length >= MAX_FAVORITES) {
+        setErrorMessage(
+          `お気に入りは${MAX_FAVORITES}件まで登録できます。不要な大会を外してください。`
+        );
+        setIsToggling(false);
+        return;
+      }
+
       const next = favorites.includes(tournamentId)
         ? favorites.filter((id) => id !== tournamentId)
         : [tournamentId, ...favorites];
+
       writeFavorites(next);
       setIsFavorite(next.includes(tournamentId));
       setIsToggling(false);
@@ -158,7 +170,10 @@ export function FavoriteButton({
         .eq("user_id", user.id)
         .eq("tournament_id", tournamentId);
 
-      if (!error) setIsFavorite(false);
+      if (!error) {
+        setIsFavorite(false);
+        setErrorMessage("");
+      }
       setIsToggling(false);
       return;
     }
@@ -168,12 +183,21 @@ export function FavoriteButton({
       tournament_id: tournamentId,
     });
 
-    if (!error) setIsFavorite(true);
+    if (!error) {
+      setIsFavorite(true);
+      setErrorMessage("");
+    } else if (error.message?.includes("50件まで")) {
+      setErrorMessage("お気に入りは50件まで登録できます。不要な大会を外してください。");
+    } else {
+      setErrorMessage("お気に入りを更新できませんでした。");
+    }
+
     setIsToggling(false);
   }
 
   return (
-    <button
+    <div className="favorite-button-wrap">
+      <button
       type="button"
       onClick={toggleFavorite}
       disabled={!isReady || isToggling}
@@ -204,5 +228,11 @@ export function FavoriteButton({
       )}
       {!compact && (isToggling ? "更新中…" : isFavorite ? "お気に入り済み" : "お気に入り")}
     </button>
+      {errorMessage ? (
+        <span className="favorite-button-error" role="status">
+          {errorMessage}
+        </span>
+      ) : null}
+    </div>
   );
 }
