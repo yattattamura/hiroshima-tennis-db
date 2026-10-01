@@ -115,6 +115,22 @@ function convertTournament(row: SearchTournamentRow): Tournament {
 
 export default async function Home() {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  let profile: { prefecture: string | null; city: string | null } | null = null;
+
+  if (user) {
+    const { data } = await supabase
+      .from("user_profiles")
+      .select("prefecture,city")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    profile = data;
+  }
+
   const today = getJapanToday();
 
   const [
@@ -205,6 +221,9 @@ export default async function Home() {
   );
 
   const cities = citiesByPrefecture[DEFAULT_PREFECTURE] ?? [];
+  const initialPrefecture = profile?.prefecture || DEFAULT_PREFECTURE;
+  const initialCity =
+    profile?.prefecture === initialPrefecture ? profile?.city ?? "" : "";
 
   const tournamentCount =
     tournamentCountResult.count ?? 0;
@@ -226,7 +245,10 @@ export default async function Home() {
             prefectures={PREFECTURES}
             submitPath="/"
             prefectureInPath
-            initialValues={{ prefecture: DEFAULT_PREFECTURE }}
+            initialValues={{
+              prefecture: initialPrefecture,
+              city: initialCity,
+            }}
             title="検索条件を指定"
           />
 

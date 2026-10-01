@@ -6,6 +6,7 @@ import { TournamentCard } from "@/components/TournamentCard";
 import { Tournament } from "@/types/tournament";
 
 const COOKIE_NAME = "htdb_favorites";
+const MAX_FAVORITES = 50;
 
 function getJapanToday(): string {
   const parts = new Intl.DateTimeFormat("en-US", {
@@ -36,10 +37,27 @@ function readFavoriteIds(cookieValue: string | undefined): string[] {
 
     return parsed
       .filter((id): id is string => typeof id === "string")
-      .slice(0, 100);
+      .slice(0, MAX_FAVORITES);
   } catch {
     return [];
   }
+}
+
+function getTournamentEndDate(tournament: any): string | null {
+  const actualDates = Array.isArray(tournament.tournament_dates)
+    ? tournament.tournament_dates.filter(
+        (date: any) =>
+          date?.date_type !== "予備日" &&
+          typeof date?.start_date === "string"
+      )
+    : [];
+
+  const endDates = actualDates
+    .map((date: any) => date.end_date ?? date.start_date)
+    .filter((date: unknown): date is string => typeof date === "string")
+    .sort();
+
+  return endDates.at(-1) ?? tournament.end_date ?? tournament.start_date ?? null;
 }
 
 function convertTournament(row: any): Tournament {
@@ -175,7 +193,7 @@ export default async function FavoritesPage() {
       if (ids.length > 0) {
         const { data } = await supabase
           .from("tournaments")
-          .select("*")
+          .select("*, tournament_dates(start_date,end_date,date_type)")
           .in("id", ids);
 
         favoriteRows = [...(data ?? [])];
@@ -189,7 +207,7 @@ export default async function FavoritesPage() {
     if (missingIds.length > 0) {
       const { data } = await supabase
         .from("tournaments")
-        .select("*")
+        .select("*, tournament_dates(start_date,end_date,date_type)")
         .in("id", missingIds);
 
       if (data && data.length > 0) {
@@ -207,13 +225,33 @@ export default async function FavoritesPage() {
   } else if (favoriteIds.length > 0) {
     const { data, error } = await supabase
       .from("tournaments")
-      .select("*")
+      .select("*, tournament_dates(start_date,end_date,date_type)")
       .in("id", favoriteIds);
 
     if (!error && data) {
       favoriteRows = [...data];
     }
   }
+
+  const endedFavoriteIds = favoriteRows
+    .filter((tournament) => {
+      const endDate = getTournamentEndDate(tournament);
+      return endDate !== null && endDate < today;
+    })
+    .map((tournament) => tournament.id)
+    .filter((id): id is string => typeof id === "string");
+
+  if (user && endedFavoriteIds.length > 0) {
+    await supabase
+      .from("user_favorites")
+      .delete()
+      .eq("user_id", user.id)
+      .in("tournament_id", endedFavoriteIds);
+  }
+
+  favoriteRows = favoriteRows.filter(
+    (tournament) => !endedFavoriteIds.includes(tournament.id)
+  );
 
   favoriteRows.sort((a, b) => {
     const aDeadline = getDeadlineInfo(a.deadline_date ?? null, today);
