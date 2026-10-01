@@ -72,8 +72,14 @@ export function SearchForm({
       }
     }
 
+    let targetPath = submitPath;
+
     if (prefectureInPath) {
       qs.delete("prefecture");
+      const selected = prefectures.find(
+        (prefecture) => prefecture.name === selectedPrefecture
+      );
+      targetPath = selected ? "/" + selected.slug : "/tournaments";
     }
 
     const queryString = qs.toString();
@@ -81,8 +87,8 @@ export function SearchForm({
     startTransition(() => {
       router.push(
         queryString
-          ? submitPath + "?" + queryString
-          : submitPath
+          ? targetPath + "?" + queryString
+          : targetPath
       );
     });
   };
