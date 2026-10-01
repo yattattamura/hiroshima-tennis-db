@@ -4,11 +4,13 @@ import { createClient } from "@/lib/supabase/server";
 import { TournamentCard } from "@/components/TournamentCard";
 import { SearchForm } from "@/components/SearchForm";
 import { Tournament, TournamentDate } from "@/types/tournament";
+import { DEFAULT_PREFECTURE, PREFECTURES } from "@/lib/prefectures";
 
 type SearchTournamentRow = {
   id: string;
   name: string;
   organizer_name_raw: string | null;
+  prefecture: string | null;
   city: string | null;
   venue_name_raw: string | null;
   date_text: string | null;
@@ -80,6 +82,7 @@ function convertTournament(row: SearchTournamentRow): Tournament {
     date: row.date_text ?? "",
     startDate: row.start_date ?? undefined,
     tournamentDates,
+    prefecture: row.prefecture ?? "",
     city: row.city ?? "",
     venue: row.venue_name_raw ?? "",
     eventType: row.event_type ?? "",
@@ -123,6 +126,7 @@ export default async function Home() {
     supabase
       .from("tournaments")
       .select("*, tournament_dates(id, start_date, end_date, date_type, label, sort_order)")
+      .eq("prefecture", DEFAULT_PREFECTURE)
       .gte("start_date", today)
       .order("start_date", {
         ascending: true,
@@ -131,7 +135,7 @@ export default async function Home() {
       .limit(3),
     supabase
       .from("tournaments")
-      .select("city")
+      .select("prefecture, city")
       .not("city", "is", null),
     supabase
       .from("tournaments")
@@ -186,19 +190,21 @@ export default async function Home() {
     convertTournament(row as SearchTournamentRow)
   );
 
-  const cities = Array.from(
-    new Set(
-      (citiesResult.data ?? [])
-        .map((row) => row.city)
-        .filter(
-          (city): city is string =>
-            typeof city === "string" &&
-            city.trim().length > 0
-        )
-    )
-  ).sort((a, b) =>
-    a.localeCompare(b, "ja")
+  const citiesByPrefecture = (citiesResult.data ?? []).reduce<Record<string, string[]>>((map, row) => {
+    const prefecture = row.prefecture?.trim();
+    const city = row.city?.trim();
+    if (!prefecture || !city) return map;
+    const current = map[prefecture] ?? [];
+    if (!current.includes(city)) current.push(city);
+    map[prefecture] = current;
+    return map;
+  }, {});
+
+  Object.values(citiesByPrefecture).forEach((values) =>
+    values.sort((a, b) => a.localeCompare(b, "ja"))
   );
+
+  const cities = citiesByPrefecture[DEFAULT_PREFECTURE] ?? [];
 
   const tournamentCount =
     tournamentCountResult.count ?? 0;
@@ -219,6 +225,9 @@ export default async function Home() {
 
           <SearchForm
             cities={cities}
+            citiesByPrefecture={citiesByPrefecture}
+            prefectures={PREFECTURES}
+            initialValues={{ prefecture: DEFAULT_PREFECTURE }}
             title="検索条件を指定"
           />
 
