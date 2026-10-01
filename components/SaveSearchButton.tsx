@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { getPrefectureSlug } from "@/lib/prefectures";
 
 const supabase = createClient();
 
@@ -31,14 +32,25 @@ function cleanFilters(filters: SavedSearchFilters) {
 }
 
 function buildSearchUrl(filters: SavedSearchFilters) {
+  const cleaned = cleanFilters(filters);
   const params = new URLSearchParams();
-  for (const [key, value] of Object.entries(cleanFilters(filters))) {
-    if (typeof value === "string") {
+  for (const [key, value] of Object.entries(cleaned)) {
+    if (key !== "prefecture" && typeof value === "string") {
       params.set(key, value);
     }
   }
+
+  const prefectureSlug =
+    typeof cleaned.prefecture === "string"
+      ? getPrefectureSlug(cleaned.prefecture)
+      : undefined;
+
+  const basePath = prefectureSlug
+    ? "/" + prefectureSlug
+    : "/tournaments";
   const query = params.toString();
-  return query ? "/tournaments?" + query : "/tournaments";
+
+  return query ? basePath + "?" + query : basePath;
 }
 
 export function SaveSearchButton({
