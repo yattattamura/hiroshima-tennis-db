@@ -192,7 +192,7 @@ export function SearchForm({
             aria-label="市区町村"
           >
             <option value="">すべて</option>
-            {(citiesByPrefecture[selectedPrefecture] ?? cities).map((city) => (
+            {(selectedPrefecture ? citiesByPrefecture[selectedPrefecture] ?? [] : cities).map((city) => (
               <option key={city} value={city}>
                 {city}
               </option>
