@@ -115,10 +115,22 @@ function convertTournament(row: SearchTournamentRow): Tournament {
 
 export default async function Home() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  const { data: profile } = user
-    ? await supabase.from("user_profiles").select("prefecture,city").eq("user_id", user.id).maybeSingle()
-    : { data: null };
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  let profile: { prefecture: string | null; city: string | null } | null = null;
+
+  if (user) {
+    const { data } = await supabase
+      .from("user_profiles")
+      .select("prefecture,city")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    profile = data;
+  }
+
   const today = getJapanToday();
 
   const [
