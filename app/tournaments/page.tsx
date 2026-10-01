@@ -6,7 +6,7 @@ import { TournamentCard } from "@/components/TournamentCard";
 import { Tournament } from "@/types/tournament";
 import { SaveSearchButton } from "@/components/SaveSearchButton";
 import { resolveTournamentCity } from "@/lib/tournamentLocation";
-import { DEFAULT_PREFECTURE, PREFECTURES } from "@/lib/prefectures";
+import { PREFECTURES } from "@/lib/prefectures";
 import type { TournamentDate } from "@/types/tournament";
 
 type SearchParams = {
