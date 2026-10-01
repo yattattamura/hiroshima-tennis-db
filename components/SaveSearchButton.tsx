@@ -9,6 +9,7 @@ const supabase = createClient();
 export type SavedSearchFilters = {
   keyword?: string;
   period?: string;
+  prefecture?: string;
   city?: string;
   eventType?: string;
   gender?: string;
@@ -66,7 +67,7 @@ export function SaveSearchButton({
     }
 
     const suggestedName =
-      [filters.city, filters.level, filters.eventType, filters.keyword]
+      [filters.prefecture, filters.city, filters.level, filters.eventType, filters.keyword]
         .filter(Boolean)
         .join("・") || "大会検索条件";
 
