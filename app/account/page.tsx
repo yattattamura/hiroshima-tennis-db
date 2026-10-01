@@ -6,6 +6,8 @@ import { LogoutButton } from "@/components/LogoutButton";
 import { NotificationSettings } from "@/components/NotificationSettings";
 import { PasswordChangeForm } from "@/components/PasswordChangeForm";
 import { SavedSearchList } from "@/components/SavedSearchList";
+import { UserProfileSettings } from "@/components/UserProfileSettings";
+import { PREFECTURES } from "@/lib/prefectures";
 
 function getJapanToday(): string {
   const parts = new Intl.DateTimeFormat("en-US", {
@@ -44,6 +46,21 @@ function daysUntil(deadline: string, today: string): number | null {
   );
 }
 
+function getTournamentEndDate(tournament: any): string | null {
+  const actualDates = Array.isArray(tournament.tournament_dates)
+    ? tournament.tournament_dates.filter(
+        (date: any) => date?.date_type !== "予備日" && typeof date?.start_date === "string"
+      )
+    : [];
+
+  const endDates = actualDates
+    .map((date: any) => date.end_date ?? date.start_date)
+    .filter((date: unknown): date is string => typeof date === "string")
+    .sort();
+
+  return endDates.at(-1) ?? tournament.end_date ?? tournament.start_date ?? null;
+}
+
 export default async function AccountPage() {
   const supabase = await createClient();
 
@@ -69,6 +86,8 @@ export default async function AccountPage() {
     { data: follows },
     { data: settings },
     { data: proposals },
+    { data: profile },
+    { data: profileCities },
   ] = await Promise.all([
     supabase
       .from("user_favorites")
@@ -100,6 +119,17 @@ export default async function AccountPage() {
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .limit(20),
+
+    supabase
+      .from("user_profiles")
+      .select("prefecture,city")
+      .eq("user_id", user.id)
+      .maybeSingle(),
+
+    supabase
+      .from("tournaments")
+      .select("prefecture,city")
+      .not("city", "is", null),
   ]);
 
   const favoriteIds = (favorites ?? [])
@@ -111,15 +141,39 @@ export default async function AccountPage() {
       ? await supabase
           .from("tournaments")
           .select(
-            "id,name,date_text,deadline_date,city,venue_name_raw"
+            "id,name,date_text,deadline_date,city,venue_name_raw,start_date,end_date,tournament_dates(start_date,end_date,date_type)"
           )
           .in("id", favoriteIds)
       : { data: [] };
 
+  const endedFavoriteIds = (favoriteTournaments ?? [])
+    .filter((tournament) => {
+      const endDate = getTournamentEndDate(tournament);
+      return endDate !== null && endDate < today;
+    })
+    .map((tournament) => tournament.id)
+    .filter((id): id is string => typeof id === "string");
+
+  if (endedFavoriteIds.length > 0) {
+    await supabase
+      .from("user_favorites")
+      .delete()
+      .eq("user_id", user.id)
+      .in("tournament_id", endedFavoriteIds);
+  }
+
+  const activeFavoriteTournaments = (favoriteTournaments ?? []).filter(
+    (tournament) => !endedFavoriteIds.includes(tournament.id)
+  );
+
+  const activeFavoriteIds = activeFavoriteTournaments
+    .map((tournament) => tournament.id)
+    .filter((id): id is string => typeof id === "string");
+
   const deadlineEnabled = settings?.deadline_enabled ?? true;
   const deadlineDays = settings?.deadline_days ?? 7;
 
-  const deadlineAlerts = (favoriteTournaments ?? [])
+  const deadlineAlerts = activeFavoriteTournaments
     .map((tournament) => ({
       ...tournament,
       days: daysUntil(tournament.deadline_date ?? "", today),
@@ -132,6 +186,23 @@ export default async function AccountPage() {
         tournament.days <= deadlineDays
     )
     .sort((a, b) => (a.days ?? 999) - (b.days ?? 999));
+
+  const citiesByPrefecture = (profileCities ?? []).reduce<Record<string, string[]>>(
+    (map, row) => {
+      const prefecture = row.prefecture?.trim();
+      const city = row.city?.trim();
+      if (!prefecture || !city) return map;
+      const current = map[prefecture] ?? [];
+      if (!current.includes(city)) current.push(city);
+      map[prefecture] = current;
+      return map;
+    },
+    {}
+  );
+
+  Object.values(citiesByPrefecture).forEach((cities) =>
+    cities.sort((a, b) => a.localeCompare(b, "ja"))
+  );
 
   const organizerIds = (follows ?? [])
     .map((row) => row.organizer_id)
@@ -208,17 +279,32 @@ export default async function AccountPage() {
         <section className="account-dashboard-grid">
           <article className="card account-dashboard-card">
             <div className="account-section-heading">
+              <h2>居住地設定</h2>
+            </div>
+            <p className="muted" style={{ margin: "0 0 12px", fontSize: 12 }}>
+              登録した地域は大会検索の初期値として使います。
+            </p>
+            <UserProfileSettings
+              initialPrefecture={profile?.prefecture ?? ""}
+              initialCity={profile?.city ?? ""}
+              prefectures={PREFECTURES}
+              citiesByPrefecture={citiesByPrefecture}
+            />
+          </article>
+
+          <article className="card account-dashboard-card">
+            <div className="account-section-heading">
               <div>
                 <h2>お気に入り</h2>
-                <p className="muted">{favoriteIds.length}件</p>
+                <p className="muted">{activeFavoriteIds.length}件</p>
               </div>
               <Link href="/favorites" className="section-link">
                 一覧を見る →
               </Link>
             </div>
-            {favoriteTournaments?.length ? (
+            {activeFavoriteTournaments.length ? (
               <div className="account-list">
-                {favoriteTournaments.slice(0, 5).map((tournament) => (
+                {activeFavoriteTournaments.slice(0, 5).map((tournament) => (
                   <Link
                     key={tournament.id}
                     href={"/tournaments/" + tournament.id}
