@@ -14,6 +14,7 @@ export type Tournament = {
   date: string;
   startDate?: string;
   tournamentDates?: TournamentDate[];
+  prefecture: string;
   city: string;
   venue: string;
   eventType: string;
