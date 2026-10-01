@@ -6,10 +6,12 @@ import { TournamentCard } from "@/components/TournamentCard";
 import { Tournament } from "@/types/tournament";
 import { SaveSearchButton } from "@/components/SaveSearchButton";
 import { resolveTournamentCity } from "@/lib/tournamentLocation";
+import { DEFAULT_PREFECTURE, PREFECTURES } from "@/lib/prefectures";
 import type { TournamentDate } from "@/types/tournament";
 
 type SearchParams = {
   period?: string;
+  prefecture?: string;
   city?: string;
   eventType?: string;
   gender?: string;
@@ -122,11 +124,12 @@ function getPageNumber(value: string | undefined): number {
   return parsed;
 }
 
-function buildPageHref(params: SearchParams, page: number): string {
+function buildPageHref(params: SearchParams, page: number, basePath = "/tournaments", routePrefecture?: string): string {
   const search = new URLSearchParams();
 
   const entries: Array<[string, string | undefined]> = [
     ["keyword", params.keyword],
+    ["prefecture", routePrefecture ? undefined : params.prefecture],
     ["period", params.period],
     ["city", params.city],
     ["eventType", params.eventType],
@@ -148,16 +151,21 @@ function buildPageHref(params: SearchParams, page: number): string {
   }
 
   const query = search.toString();
-  return query ? `/tournaments?${query}` : "/tournaments";
+  return query ? `${basePath}?${query}` : basePath;
 }
 
 export default async function TournamentsPage({
   searchParams,
+  routePrefecture,
+  basePath = "/tournaments",
 }: {
   searchParams: Promise<SearchParams>;
+  routePrefecture?: string;
+  basePath?: string;
 }) {
   const params = await searchParams;
 
+  const prefecture = routePrefecture ?? params.prefecture ?? "";
   const period = params.period ?? "all";
   const city = params.city ?? "";
   const eventType = params.eventType ?? "";
@@ -205,6 +213,10 @@ export default async function TournamentsPage({
         ].join(",")
       );
     }
+  }
+
+  if (prefecture) {
+    query = query.eq("prefecture", prefecture);
   }
 
   if (city) {
@@ -300,7 +312,7 @@ export default async function TournamentsPage({
     query,
     supabase
       .from("tournaments")
-      .select("city")
+      .select("prefecture, city")
       .not("city", "is", null),
   ]);
 
@@ -330,6 +342,18 @@ export default async function TournamentsPage({
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
   const startItem = totalCount === 0 ? 0 : from + 1;
   const endItem = Math.min(from + tournaments.length, totalCount);
+
+  const citiesByPrefecture = (citiesResult.data ?? []).reduce<Record<string, string[]>>((map, row) => {
+    const pref = row.prefecture?.trim();
+    const cityName = row.city?.trim();
+    if (!pref || !cityName) return map;
+    const current = map[pref] ?? [];
+    if (!current.includes(cityName)) current.push(cityName);
+    map[pref] = current;
+    return map;
+  }, {});
+
+  Object.values(citiesByPrefecture).forEach((values) => values.sort((a, b) => a.localeCompare(b, "ja")));
 
   const cities = Array.from(
     new Set(
@@ -376,17 +400,22 @@ export default async function TournamentsPage({
           }}
         >
           <h1 className="section-title" style={{ margin: 0 }}>
-            大会を探す
+            {prefecture ? `${prefecture.replace(/[都道府県]$/, "")}の大会を探す` : "大会を探す"}
           </h1>
         </div>
 
         <SearchForm
           cities={cities}
+          citiesByPrefecture={citiesByPrefecture}
+          prefectures={PREFECTURES}
+          submitPath={basePath}
+          prefectureInPath={Boolean(routePrefecture)}
           title="検索条件を指定"
           collapsible
           initiallyCollapsed={
             !(
               keyword ||
+              prefecture ||
               period !== "all" ||
               city ||
               eventType ||
@@ -399,6 +428,7 @@ export default async function TournamentsPage({
           }
           initialValues={{
             keyword,
+            prefecture,
             period,
             city,
             eventType,
@@ -414,6 +444,7 @@ export default async function TournamentsPage({
           <SaveSearchButton
             filters={{
               keyword,
+              prefecture,
               period,
               city,
               eventType,
@@ -458,10 +489,10 @@ export default async function TournamentsPage({
                   flexWrap: "wrap",
                 }}
               >
-                <Link href="/tournaments?deadline=all" className="outline-button">
+                <Link href={prefecture ? `${basePath}?deadline=all` : "/tournaments?deadline=all"} className="outline-button">
                   申込条件を外す
                 </Link>
-                <Link href="/tournaments" className="primary">
+                <Link href={prefecture ? basePath : "/tournaments"} className="primary">
                   全条件をクリア
                 </Link>
               </div>
@@ -482,7 +513,7 @@ export default async function TournamentsPage({
             >
               {currentPage > 1 && (
                 <Link
-                  href={buildPageHref(params, currentPage - 1)}
+                  href={buildPageHref(params, currentPage - 1, basePath, routePrefecture)}
                   className="outline-button"
                   style={{ minHeight: "auto", padding: "7px 10px" }}
                 >
@@ -498,7 +529,7 @@ export default async function TournamentsPage({
                 ) : (
                   <Link
                     key={item}
-                    href={buildPageHref(params, item)}
+                    href={buildPageHref(params, item, basePath, routePrefecture)}
                     aria-current={item === currentPage ? "page" : undefined}
                     className={item === currentPage ? "primary small" : "outline-button"}
                     style={{
@@ -515,7 +546,7 @@ export default async function TournamentsPage({
 
               {currentPage < totalPages && (
                 <Link
-                  href={buildPageHref(params, currentPage + 1)}
+                  href={buildPageHref(params, currentPage + 1, basePath, routePrefecture)}
                   className="outline-button"
                   style={{ minHeight: "auto", padding: "7px 10px" }}
                 >
