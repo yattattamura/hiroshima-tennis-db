@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 type SearchValues = {
   keyword?: string;
   period?: string;
+  prefecture?: string;
   city?: string;
   eventType?: string;
   level?: string;
@@ -17,12 +18,20 @@ type SearchValues = {
 
 export function SearchForm({
   cities,
+  citiesByPrefecture,
+  prefectures,
+  submitPath = "/tournaments",
+  prefectureInPath = false,
   initialValues = {},
   title = "大会を探す",
   collapsible = false,
   initiallyCollapsed = false,
 }: {
   cities: string[];
+  citiesByPrefecture: Record<string, string[]>;
+  prefectures: Array<{ name: string; slug: string }>;
+  submitPath?: string;
+  prefectureInPath?: boolean;
   initialValues?: SearchValues;
   title?: string;
   collapsible?: boolean;
@@ -33,6 +42,8 @@ export function SearchForm({
     collapsible && initiallyCollapsed
   );
   const [isPending, startTransition] = useTransition();
+  const [selectedPrefecture, setSelectedPrefecture] = useState(initialValues.prefecture ?? "");
+  const [selectedCity, setSelectedCity] = useState(initialValues.city ?? "");
   const hasAdvancedFilters = Boolean(
     initialValues.gender ||
       initialValues.eligibility ||
@@ -121,6 +132,29 @@ export function SearchForm({
 
         <label className="quick-filter">
           <span className="quick-filter-top">
+            <span className="quick-filter-icon" aria-hidden="true">📍</span>
+            <span className="quick-filter-label">都道府県</span>
+          </span>
+          <select
+            name="prefecture"
+            value={selectedPrefecture}
+            onChange={(event) => {
+              setSelectedPrefecture(event.target.value);
+              setSelectedCity("");
+            }}
+            aria-label="都道府県"
+          >
+            <option value="">すべて</option>
+            {prefectures.map((prefecture) => (
+              <option key={prefecture.slug} value={prefecture.name}>
+                {prefecture.name}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="quick-filter">
+          <span className="quick-filter-top">
             <span className="quick-filter-icon" aria-hidden="true">📅</span>
             <span className="quick-filter-label">日程</span>
           </span>
@@ -138,16 +172,17 @@ export function SearchForm({
 
         <label className="quick-filter">
           <span className="quick-filter-top">
-            <span className="quick-filter-icon" aria-hidden="true">📍</span>
-            <span className="quick-filter-label">エリア</span>
+            <span className="quick-filter-icon" aria-hidden="true">🏙️</span>
+            <span className="quick-filter-label">市区町村</span>
           </span>
           <select
             name="city"
-            defaultValue={initialValues.city ?? ""}
-            aria-label="エリア"
+            value={selectedCity}
+            onChange={(event) => setSelectedCity(event.target.value)}
+            aria-label="市区町村"
           >
             <option value="">すべて</option>
-            {cities.map((city) => (
+            {(citiesByPrefecture[selectedPrefecture] ?? cities).map((city) => (
               <option key={city} value={city}>
                 {city}
               </option>
