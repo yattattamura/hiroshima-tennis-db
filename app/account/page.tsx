@@ -196,9 +196,6 @@ export default async function AccountPage() {
             <p className="muted">{user.email}</p>
           </div>
           <div className="account-hero-actions">
-            <Link className="primary" href="/tournaments">
-              大会を探す
-            </Link>
             {adminUser ? (
               <Link className="outline-button" href="/admin/deadlines">
                 締切メンテナンス
