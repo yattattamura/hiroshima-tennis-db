@@ -630,7 +630,7 @@ nav a:hover,
 
 .search-primary-grid {
   display: grid;
-  grid-template-columns: 1.45fr repeat(5, 1fr);
+  grid-template-columns: 1.45fr repeat(6, 1fr);
   gap: 9px;
 }
 
