@@ -72,13 +72,17 @@ export function SearchForm({
       }
     }
 
+    if (prefectureInPath) {
+      qs.delete("prefecture");
+    }
+
     const queryString = qs.toString();
 
     startTransition(() => {
       router.push(
         queryString
-          ? "/tournaments?" + queryString
-          : "/tournaments"
+          ? submitPath + "?" + queryString
+          : submitPath
       );
     });
   };
