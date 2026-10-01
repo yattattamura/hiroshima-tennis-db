@@ -401,7 +401,7 @@ export default async function TournamentsPage({
           }}
         >
           <h1 className="section-title" style={{ margin: 0 }}>
-            {prefecture ? `${prefecture.replace(/[都道府県]$/, "")}の大会を探す` : "大会を探す"}
+            {prefecture ? `${prefecture}の社会人・一般テニス大会を探す` : "社会人・一般テニス大会を探す"}
           </h1>
         </div>
 
