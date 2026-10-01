@@ -64,6 +64,7 @@ function convertTournament(row: any): Tournament {
       label: date.label,
       sortOrder: date.sort_order ?? 0,
     })),
+    prefecture: row.prefecture ?? "",
     city: resolveTournamentCity(row.city, row.venue_name_raw),
     venue: row.venue_name_raw ?? "",
     eventType: row.event_type ?? "",
