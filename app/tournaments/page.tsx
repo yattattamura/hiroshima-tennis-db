@@ -166,9 +166,38 @@ export default async function TournamentsPage({
 }) {
   const params = await searchParams;
 
-  const prefecture = routePrefecture ?? params.prefecture ?? "";
+  const hasExplicitSearchParams = Object.entries(params).some(
+    ([key, value]) =>
+      key !== "page" &&
+      typeof value === "string" &&
+      value.trim() !== ""
+  );
+
+  const supabase = await createClient();
+
+  let profilePrefecture = "";
+  let profileCity = "";
+
+  if (!routePrefecture && !hasExplicitSearchParams) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (user) {
+      const { data: profile } = await supabase
+        .from("user_profiles")
+        .select("prefecture,city")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      profilePrefecture = profile?.prefecture ?? "";
+      profileCity = profile?.city ?? "";
+    }
+  }
+
+  const prefecture = routePrefecture ?? params.prefecture ?? profilePrefecture;
   const period = params.period ?? "all";
-  const city = params.city ?? "";
+  const city = params.city ?? profileCity;
   const eventType = params.eventType ?? "";
   const gender = params.gender ?? "";
   const level = params.level ?? "";
@@ -182,7 +211,6 @@ export default async function TournamentsPage({
   const status = params.status ?? "";
   const currentPage = getPageNumber(params.page);
 
-  const supabase = await createClient();
   const today = getJapanToday();
 
   let query = supabase
