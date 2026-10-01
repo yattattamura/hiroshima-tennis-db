@@ -359,6 +359,38 @@ nav a:hover,
   color: #8a5a00;
 }
 
+.user-profile-settings {
+  display: grid;
+  gap: 10px;
+}
+
+.user-profile-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.user-profile-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.user-profile-settings button {
+  width: 100%;
+}
+
+.favorite-button-wrap {
+  flex-wrap: wrap;
+}
+
+.favorite-button-error {
+  color: #a42a22;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
 .notification-settings {
   display: grid;
   gap: 12px;
@@ -1331,6 +1363,10 @@ textarea:focus {
 }
 
 @media (max-width: 640px) {
+  .user-profile-grid {
+    grid-template-columns: 1fr;
+  }
+
   .account-page {
     padding: 8px 0 22px;
   }
