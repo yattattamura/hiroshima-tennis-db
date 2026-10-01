@@ -227,6 +227,8 @@ export default async function Home() {
             cities={cities}
             citiesByPrefecture={citiesByPrefecture}
             prefectures={PREFECTURES}
+            submitPath="/"
+            prefectureInPath
             initialValues={{ prefecture: DEFAULT_PREFECTURE }}
             title="検索条件を指定"
           />
