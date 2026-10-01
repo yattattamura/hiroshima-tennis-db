@@ -217,10 +217,7 @@ export default async function Home() {
       <section className="hero home-hero">
         <div className="container">
           <div className="hero-copy">
-            <p className="hero-eyebrow">
-              広島県の社会人・一般テニス大会
-            </p>
-            <h1>広島の大会を探す</h1>
+            <h1>広島県の社会人・一般テニス大会を探す</h1>
           </div>
 
           <SearchForm
