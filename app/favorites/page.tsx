@@ -193,7 +193,7 @@ export default async function FavoritesPage() {
       if (ids.length > 0) {
         const { data } = await supabase
           .from("tournaments")
-          .select("*")
+          .select("*, tournament_dates(start_date,end_date,date_type)")
           .in("id", ids);
 
         favoriteRows = [...(data ?? [])];
@@ -225,7 +225,7 @@ export default async function FavoritesPage() {
   } else if (favoriteIds.length > 0) {
     const { data, error } = await supabase
       .from("tournaments")
-      .select("*")
+      .select("*, tournament_dates(start_date,end_date,date_type)")
       .in("id", favoriteIds);
 
     if (!error && data) {
