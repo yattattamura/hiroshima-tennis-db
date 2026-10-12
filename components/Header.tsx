@@ -91,33 +91,32 @@ export function Header() {
         </div>
       </header>
 
-      <nav
-        className="mobile-bottom-nav"
-        aria-label="スマホ用ナビゲーション"
-      >
-        <Link href="/" className={"mobile-bottom-nav-item" + (isActive("/") ? " active" : "")}>
-          <span aria-hidden="true">🏠</span>
-          <span>ホーム</span>
-        </Link>
-        <Link href="/tournaments" className={"mobile-bottom-nav-item" + (isActive("/tournaments") ? " active" : "")}>
-          <span aria-hidden="true">🎾</span>
-          <span>大会を探す</span>
-        </Link>
-        <Link href="/favorites" className={"mobile-bottom-nav-item" + (isActive("/favorites") ? " active" : "")}>
-          <span aria-hidden="true">♡</span>
-          <span>お気に入り</span>
-        </Link>
-        <Link href="/recent" className={"mobile-bottom-nav-item" + (isActive("/recent") ? " active" : "")}>
-          <span aria-hidden="true">🕘</span>
-          <span>最近見た</span>
-        </Link>
-        <Link
-          href={userEmail ? "/account" : "/auth/login"}
-          className={"mobile-bottom-nav-item" + ((pathname.startsWith("/account") || pathname.startsWith("/auth")) ? " active" : "")}
-        >
-          <span aria-hidden="true">👤</span>
-          <span>{userEmail ? "マイページ" : "ログイン"}</span>
-        </Link>
+      <nav className="mobile-bottom-nav" aria-label="スマホ用ナビゲーション">
+        <div className="mobile-bottom-nav-inner">
+          <Link href="/" className={"mobile-bottom-nav-item" + (isActive("/") ? " active" : "")}>
+            <span aria-hidden="true">🏠</span>
+            <span>ホーム</span>
+          </Link>
+          <Link href="/tournaments" className={"mobile-bottom-nav-item" + (isActive("/tournaments") ? " active" : "")}>
+            <span aria-hidden="true">🎾</span>
+            <span>大会を探す</span>
+          </Link>
+          <Link href="/favorites" className={"mobile-bottom-nav-item" + (isActive("/favorites") ? " active" : "")}>
+            <span aria-hidden="true">♡</span>
+            <span>お気に入り</span>
+          </Link>
+          <Link href="/recent" className={"mobile-bottom-nav-item" + (isActive("/recent") ? " active" : "")}>
+            <span aria-hidden="true">🕘</span>
+            <span>最近見た</span>
+          </Link>
+          <Link
+            href={userEmail ? "/account" : "/auth/login"}
+            className={"mobile-bottom-nav-item mobile-bottom-nav-account" + ((pathname.startsWith("/account") || pathname.startsWith("/auth")) ? " active" : "")}
+          >
+            <span aria-hidden="true">👤</span>
+            <span>{userEmail ? "マイページ" : "ログイン"}</span>
+          </Link>
+        </div>
       </nav>
 
       <style
