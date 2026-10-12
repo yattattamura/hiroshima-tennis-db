@@ -256,11 +256,16 @@ export default async function Home() {
             <div>
               <strong>みんなで大会情報を育てよう</strong>
               <p>
-                情報の誤りを見つけたら、無料アカウントを作って修正依頼を送れます。
+                {user
+                  ? "情報の誤りを見つけたら、大会詳細ページから修正依頼を送れます。"
+                  : "情報の誤りを見つけたら、無料アカウントを作って修正依頼を送れます。"}
               </p>
             </div>
-            <Link href="/auth/signup" className="outline-button">
-              無料で参加する
+            <Link
+              href={user ? "/tournaments" : "/auth/signup"}
+              className="outline-button"
+            >
+              {user ? "大会を探す" : "無料で参加する"}
             </Link>
           </div>
         </div>
