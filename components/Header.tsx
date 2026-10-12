@@ -211,9 +211,9 @@ export function Header() {
                 display: none;
               }
 
-              /* マイページはヘッダーにも残して、下部ナビ以外からも到達できるようにする */
+              /* スマホでは下部ナビにマイページがあるため、ヘッダー側は非表示 */
               .header-account {
-                display: block;
+                display: none;
               }
 
               .header-nav {
