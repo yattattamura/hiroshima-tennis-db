@@ -1495,7 +1495,9 @@ textarea:focus {
     bottom: 0;
     z-index: 30;
     display: grid !important;
-    grid-template-columns: repeat(5, 1fr);
+    width: auto;
+    margin-left: 0;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 2px;
     padding: 7px 8px calc(7px + env(safe-area-inset-bottom));
     background: #eef5fc;
@@ -1525,7 +1527,7 @@ textarea:focus {
     font-size: 13px;
   }
 
-  nav a:last-child {
+  .header-nav a:last-child {
     display: none;
   }
 
