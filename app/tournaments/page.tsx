@@ -172,7 +172,9 @@ export default async function TournamentsPage({
   let profilePrefecture = "";
   let profileCity = "";
 
-  const areaNavigation = params.area === "1";\n\n  if (!areaNavigation && !routePrefecture && (!params.prefecture || !params.city)) {
+  const areaNavigation = params.area === "1";
+
+  if (!areaNavigation && !routePrefecture && (!params.prefecture || !params.city)) {
     const {
       data: { user },
     } = await supabase.auth.getUser();
