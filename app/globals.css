@@ -695,6 +695,23 @@ nav a:hover,
   min-width: 0;
 }
 
+.prefecture-coverage-note {
+  display: block;
+  margin: 5px 0 0;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--muted);
+}
+
+.prefecture-coverage-note.is-supported {
+  color: var(--green);
+}
+
+.prefecture-coverage-note.is-unlisted {
+  color: #9a6700;
+}
+
 .quick-filter-top {
   display: flex;
   align-items: center;
