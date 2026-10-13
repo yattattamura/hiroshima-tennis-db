@@ -476,7 +476,7 @@ export default async function TournamentsPage({
               level,
               gender,
               eligibility,
-              deadline: params.deadline ?? "open",
+              deadline: areaNavigation ? "all" : params.deadline ?? "open",
               status,
             }}
           />
