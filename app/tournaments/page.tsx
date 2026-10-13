@@ -21,6 +21,7 @@ type SearchParams = {
   deadline?: string;
   status?: string;
   page?: string;
+  area?: string;
 };
 
 const PAGE_SIZE = 20;
@@ -171,7 +172,9 @@ export default async function TournamentsPage({
   let profilePrefecture = "";
   let profileCity = "";
 
-  if (!routePrefecture && (!params.prefecture || !params.city)) {
+  const areaNavigation = params.area === "1";
+
+  if (!areaNavigation && !routePrefecture && (!params.prefecture || !params.city)) {
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -190,9 +193,9 @@ export default async function TournamentsPage({
 
   const prefecture = routePrefecture ?? params.prefecture ?? profilePrefecture;
   const period = params.period ?? "all";
-  const city =
-    params.city ??
-    (profilePrefecture === prefecture ? profileCity : "");
+  const city = areaNavigation
+    ? (params.city ?? "")
+    : params.city ?? (profilePrefecture === prefecture ? profileCity : "");
   const eventType = params.eventType ?? "";
   const gender = params.gender ?? "";
   const level = params.level ?? "";
@@ -200,7 +203,7 @@ export default async function TournamentsPage({
   const keyword = params.keyword?.trim() ?? "";
   const deadlineParam = params.deadline;
   const deadline =
-    deadlineParam === "all"
+    areaNavigation || deadlineParam === "all"
       ? ""
       : deadlineParam ?? "open";
   const status = params.status ?? "";
@@ -459,7 +462,7 @@ export default async function TournamentsPage({
             level,
             gender,
             eligibility,
-            deadline: params.deadline ?? "open",
+            deadline: areaNavigation ? "all" : params.deadline ?? "open",
             status,
           }}
         />
@@ -475,7 +478,7 @@ export default async function TournamentsPage({
               level,
               gender,
               eligibility,
-              deadline: params.deadline ?? "open",
+              deadline: areaNavigation ? "all" : params.deadline ?? "open",
               status,
             }}
           />

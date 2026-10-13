@@ -16,7 +16,6 @@ export function UserProfileSettings({
   prefectures,
   citiesByPrefecture,
 }: UserProfileSettingsProps) {
-  const supabase = createClient();
   const [prefecture, setPrefecture] = useState(initialPrefecture);
   const [city, setCity] = useState(initialCity);
   const [saving, setSaving] = useState(false);
@@ -29,6 +28,7 @@ export function UserProfileSettings({
   async function saveProfile() {
     if (saving) return;
 
+    const supabase = createClient();
     setSaving(true);
     setMessage("");
 

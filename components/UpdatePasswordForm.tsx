@@ -5,8 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-const supabase = createClient();
-
 export function UpdatePasswordForm() {
   const router = useRouter();
   const [newPassword, setNewPassword] = useState("");
@@ -20,6 +18,7 @@ export function UpdatePasswordForm() {
     let mounted = true;
 
     async function checkSession() {
+      const supabase = createClient();
       const { data } = await supabase.auth.getUser();
 
       if (!mounted) return;
@@ -57,6 +56,7 @@ export function UpdatePasswordForm() {
       return;
     }
 
+    const supabase = createClient();
     const { error: updateError } = await supabase.auth.updateUser({
       password: newPassword,
     });

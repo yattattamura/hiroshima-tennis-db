@@ -5,13 +5,18 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-const supabase = createClient();
 
 export function Header() {
   const pathname = usePathname();
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
+    // Avoid initializing Supabase during server prerendering.
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+    if (!supabaseUrl || !supabaseKey) return;
+
+    const supabase = createClient();
     let mounted = true;
 
     supabase.auth.getUser().then(({ data }) => {
@@ -23,7 +28,7 @@ export function Header() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUserEmail(session?.user?.email ?? null);
+      if (mounted) setUserEmail(session?.user?.email ?? null);
     });
 
     return () => {

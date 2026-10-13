@@ -5,8 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-const supabase = createClient();
-
 type SavedSearch = {
   id: string;
   name: string;
@@ -33,6 +31,7 @@ export function SavedSearchList({
 
   async function remove(id: string) {
     if (removingId) return;
+    const supabase = createClient();
     setRemovingId(id);
     const { error } = await supabase
       .from("saved_searches")

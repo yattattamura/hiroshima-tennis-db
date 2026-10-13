@@ -4,8 +4,6 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-const supabase = createClient();
-
 export function OrganizerFollowButton({
   organizerId,
 }: {
@@ -20,6 +18,11 @@ export function OrganizerFollowButton({
     let mounted = true;
 
     async function load() {
+      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) {
+        setReady(true);
+        return;
+      }
+      const supabase = createClient();
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -55,6 +58,7 @@ export function OrganizerFollowButton({
 
   async function toggle() {
     if (!ready || isToggling) return;
+    const supabase = createClient();
     setIsToggling(true);
 
     const {

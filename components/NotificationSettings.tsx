@@ -3,8 +3,6 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-const supabase = createClient();
-
 export function NotificationSettings({
   initialEnabled,
   initialDays,
@@ -18,6 +16,7 @@ export function NotificationSettings({
   const [message, setMessage] = useState("");
 
   async function save(nextEnabled: boolean, nextDays: number) {
+    const supabase = createClient();
     setSaving(true);
     setMessage("");
 
