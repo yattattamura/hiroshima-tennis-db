@@ -131,8 +131,8 @@ export default async function AreasPage() {
           <div className="badges"><span className="badge">掲載エリア</span></div>
           <h1 style={{ marginTop: 10 }}>掲載エリア</h1>
           <p style={{ lineHeight: 1.8, marginBottom: 0 }}>
-            {SITE_NAME}は、中国地方・近畿地方の一般・社会人向けテニス大会を順次掲載しています。
-            都道府県から大会を探せます。
+            {SITE_NAME}は、中国地方・近畿地方を中心に、一般・社会人向けテニス大会を掲載しています。
+            掲載エリアは順次拡大中です。都道府県から大会を探せます。
           </p>
         </section>
 
