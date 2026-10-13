@@ -21,6 +21,7 @@ type SearchParams = {
   deadline?: string;
   status?: string;
   page?: string;
+  area?: string;
 };
 
 const PAGE_SIZE = 20;
