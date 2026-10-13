@@ -163,7 +163,6 @@ export default async function AreasPage() {
                   gap: 12,
                 }}>
                   {regionItems.map((item) => {
-                    const slug = PREFECTURES.find((pref) => pref.name === item.prefecture)?.slug;
                     const href = `/tournaments?prefecture=${encodeURIComponent(item.prefecture)}&area=1&deadline=all`;
                     return (
                       <div key={item.prefecture} className="card info-list-card" style={{ padding: 18 }}>
