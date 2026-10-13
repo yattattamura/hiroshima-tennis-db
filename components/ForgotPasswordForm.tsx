@@ -4,8 +4,6 @@ import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
-const supabase = createClient();
-
 export function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -26,6 +24,7 @@ export function ForgotPasswordForm() {
       return;
     }
 
+    const supabase = createClient();
     const { error: resetError } =
       await supabase.auth.resetPasswordForEmail(trimmedEmail, {
         redirectTo:
