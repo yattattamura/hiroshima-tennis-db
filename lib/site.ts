@@ -1,5 +1,5 @@
 export const SITE_URL =
-  "https://hiroshima-tennis-db-xzcj-delta.vercel.app";
+  "https://know-nis.vercel.app";
 
 export const SITE_NAME =
   "ノウニス";
