@@ -3,8 +3,6 @@
 import { FormEvent, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
-const supabase = createClient();
-
 export function PasswordChangeForm() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -29,6 +27,7 @@ export function PasswordChangeForm() {
     }
 
     setSaving(true);
+    const supabase = createClient();
 
     const {
       data: { user },
