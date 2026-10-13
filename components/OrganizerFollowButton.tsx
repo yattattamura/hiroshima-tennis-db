@@ -58,6 +58,7 @@ export function OrganizerFollowButton({
 
   async function toggle() {
     if (!ready || isToggling) return;
+    const supabase = createClient();
     setIsToggling(true);
 
     const {
