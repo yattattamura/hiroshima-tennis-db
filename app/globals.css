@@ -2270,6 +2270,11 @@ textarea:focus {
     border-right: 0;
   }
 
+  /* The tablet layout removes this line at item 3; restore it for the mobile 2-column grid. */
+  .detail-keyitem:nth-child(3) {
+    border-right: 1px solid #c7d5e4;
+  }
+
   .detail-keyitem:nth-child(n + 3) {
     border-top: 0;
   }
@@ -2392,8 +2397,8 @@ textarea:focus {
     font-size: 11px;
   }
 
-  .home-hero .hero h1 {
-    font-size: clamp(18px, 4.6vw, 27px);
+  .home-hero h1 {
+    font-size: clamp(16px, 4.4vw, 20px);
     line-height: 1.2;
     letter-spacing: -0.035em;
     max-width: none;
