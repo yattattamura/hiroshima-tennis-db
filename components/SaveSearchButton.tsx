@@ -5,8 +5,6 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { getPrefectureSlug } from "@/lib/prefectures";
 
-const supabase = createClient();
-
 export type SavedSearchFilters = {
   keyword?: string;
   period?: string;
@@ -63,6 +61,7 @@ export function SaveSearchButton({
   const [message, setMessage] = useState("");
 
   async function saveSearch() {
+    const supabase = createClient();
     setMessage("");
     setIsSaving(true);
 
