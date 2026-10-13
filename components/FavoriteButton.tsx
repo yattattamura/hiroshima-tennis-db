@@ -134,6 +134,7 @@ export function FavoriteButton({
 
   async function toggleFavorite() {
     if (!isReady || isToggling) return;
+    const supabase = createClient();
     setIsToggling(true);
     setErrorMessage("");
 
