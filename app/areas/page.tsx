@@ -178,7 +178,7 @@ export default async function AreasPage() {
                         {item.cities.length > 0 && (
                           <details style={{ marginTop: 12 }}>
                             <summary style={{ cursor: "pointer", color: "var(--muted, #64748b)" }}>
-                              市区町村を見る（{item.cities.length}）
+                              市町村を見る（{item.cities.length}）
                             </summary>
                             <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 10 }}>
                               {item.cities.map((city) => (
@@ -206,7 +206,7 @@ export default async function AreasPage() {
         <section className="card info-scope-card" style={{ padding: 24, marginTop: 28, marginBottom: 40 }}>
           <h2 style={{ marginTop: 0 }}>掲載範囲について</h2>
           <p className="muted" style={{ marginBottom: 0, lineHeight: 1.8 }}>
-            掲載大会がある都道府県・市区町村をデータから自動集計しています。
+            掲載大会がある都道府県・市町村をデータから自動集計しています。
             掲載地域は順次拡大していきます。大会一覧へ移動した際は、居住地や申込締切などの
             個別条件を自動適用せず、選択したエリア以外は絞り込みなしで表示します。
           </p>
