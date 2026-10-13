@@ -5,8 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-const supabase = createClient();
-
 type AuthFormProps = {
   mode: "login" | "signup";
   nextPath?: string;
@@ -27,6 +25,8 @@ export function AuthForm({ mode, nextPath = "/account" }: AuthFormProps) {
     setIsSubmitting(true);
     setMessage("");
     setError("");
+
+    const supabase = createClient();
 
     if (!email.trim() || password.length < 8) {
       setError("メールアドレスと8文字以上のパスワードを入力してください。");
