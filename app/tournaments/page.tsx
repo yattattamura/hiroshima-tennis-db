@@ -191,9 +191,9 @@ export default async function TournamentsPage({
 
   const prefecture = routePrefecture ?? params.prefecture ?? profilePrefecture;
   const period = params.period ?? "all";
-  const city =
-    params.city ??
-    (profilePrefecture === prefecture ? profileCity : "");
+  const city = areaNavigation
+    ? (params.city ?? "")
+    : params.city ?? (profilePrefecture === prefecture ? profileCity : "");
   const eventType = params.eventType ?? "";
   const gender = params.gender ?? "";
   const level = params.level ?? "";
@@ -201,7 +201,7 @@ export default async function TournamentsPage({
   const keyword = params.keyword?.trim() ?? "";
   const deadlineParam = params.deadline;
   const deadline =
-    deadlineParam === "all"
+    areaNavigation || deadlineParam === "all"
       ? ""
       : deadlineParam ?? "open";
   const status = params.status ?? "";
