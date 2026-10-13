@@ -5,6 +5,28 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { SITE_URL } from "@/lib/site";
 
+function getJapaneseAuthError(error: { message?: string; status?: number; code?: string }): string {
+  const message = (error.message ?? "").toLowerCase();
+  const code = (error.code ?? "").toLowerCase();
+
+  if (message.includes("email rate limit exceeded") || code === "over_email_send_rate_limit") {
+    return "メール送信の上限に達しました。しばらく時間をおいてから、もう一度お試しください。";
+  }
+  if (message.includes("security purposes") && message.includes("seconds")) {
+    return "安全のため、再設定メールの送信間隔に制限があります。しばらく待ってから、もう一度お試しください。";
+  }
+  if (error.status === 429 || code === "over_request_rate_limit") {
+    return "操作が短時間に集中しています。しばらく時間をおいてから、もう一度お試しください。";
+  }
+  if (message.includes("invalid email") || message.includes("email address") && message.includes("invalid")) {
+    return "メールアドレスの形式を確認してください。";
+  }
+  if (message.includes("network") || message.includes("fetch")) {
+    return "通信に失敗しました。通信環境を確認して、もう一度お試しください。";
+  }
+  return "再設定メールを送信できませんでした。時間をおいてから、もう一度お試しください。";
+}
+
 export function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -25,17 +47,29 @@ export function ForgotPasswordForm() {
       return;
     }
 
-    const supabase = createClient();
-    const { error: resetError } =
-      await supabase.auth.resetPasswordForEmail(trimmedEmail, {
-        redirectTo:
-          SITE_URL +
-          "/auth/callback?next=" +
-          encodeURIComponent("/auth/update-password"),
-      });
+    try {
+      const supabase = createClient();
+      const { error: resetError } =
+        await supabase.auth.resetPasswordForEmail(trimmedEmail, {
+          redirectTo:
+            SITE_URL +
+            "/auth/callback?next=" +
+            encodeURIComponent("/auth/update-password"),
+        });
 
-    if (resetError) {
-      setError(resetError.message);
+      if (resetError) {
+        setError(getJapaneseAuthError(resetError));
+        setIsSubmitting(false);
+        return;
+      }
+    } catch (requestError) {
+      setError(
+        getJapaneseAuthError(
+          requestError instanceof Error
+            ? { message: requestError.message }
+            : {}
+        )
+      );
       setIsSubmitting(false);
       return;
     }
