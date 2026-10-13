@@ -3,7 +3,6 @@ import Link from "next/link";
 
 import { createClient } from "@/lib/supabase/server";
 import { SITE_NAME } from "@/lib/site";
-import { PREFECTURES } from "@/lib/prefectures";
 
 export const metadata: Metadata = {
   title: "掲載エリア",
