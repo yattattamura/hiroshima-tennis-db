@@ -156,7 +156,7 @@ export function SearchForm({
             }}
             aria-label="都道府県"
           >
-            <option value="">都道府県を選択（任意）</option>
+            <option value="">都道府県を選択</option>
             {prefectures.map((prefecture) => {
               const count = prefectureTournamentCounts[prefecture.name] ?? 0;
               const label =
