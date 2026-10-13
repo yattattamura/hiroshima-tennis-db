@@ -195,6 +195,32 @@ export function Header() {
               line-height: 1;
             }
 
+            @media (max-width: 640px) {
+              .mobile-bottom-nav {
+                left: 0 !important;
+                right: 0 !important;
+                width: 100% !important;
+                min-width: 0 !important;
+                max-width: none !important;
+              }
+
+              .mobile-bottom-nav-inner {
+                display: grid !important;
+                grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+                width: 100% !important;
+                min-width: 0 !important;
+                box-sizing: border-box;
+              }
+
+              .mobile-bottom-nav-inner > .mobile-bottom-nav-item,
+              .mobile-bottom-nav-inner > .mobile-bottom-nav-account {
+                display: flex !important;
+                visibility: visible !important;
+                min-width: 0 !important;
+                width: 100% !important;
+              }
+            }
+
             @media (max-width: 700px) {
               .header-inner {
                 display: block;
