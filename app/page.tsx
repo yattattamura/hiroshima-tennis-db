@@ -226,8 +226,14 @@ export default async function Home() {
     values.sort((a, b) => a.localeCompare(b, "ja"))
   );
 
-  const cities = citiesByPrefecture[DEFAULT_PREFECTURE] ?? [];
-  const initialPrefecture = profile?.prefecture || DEFAULT_PREFECTURE;
+  const cities = Array.from(
+    new Set(
+      (citiesResult.data ?? [])
+        .map((row) => row.city?.trim())
+        .filter((city): city is string => Boolean(city))
+    )
+  ).sort((a, b) => a.localeCompare(b, "ja"));
+  const initialPrefecture = profile?.prefecture ?? "";
   const initialCity =
     profile?.prefecture === initialPrefecture ? profile?.city ?? "" : "";
 
@@ -242,7 +248,7 @@ export default async function Home() {
       <section className="hero home-hero">
         <div className="container">
           <div className="hero-copy">
-            <h1>広島県の社会人・一般テニス大会を探す</h1>
+            <h1>社会人・一般テニス大会を探す</h1>
           </div>
 
           <SearchForm
