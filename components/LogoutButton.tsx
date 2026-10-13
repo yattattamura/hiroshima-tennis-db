@@ -6,10 +6,10 @@ import { createClient } from "@/lib/supabase/client";
 
 export function LogoutButton() {
   const router = useRouter();
-  const supabase = createClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleLogout() {
+    const supabase = createClient();
     setIsSubmitting(true);
     await supabase.auth.signOut();
     router.replace("/");
