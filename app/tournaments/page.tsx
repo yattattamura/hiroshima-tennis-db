@@ -339,8 +339,7 @@ export default async function TournamentsPage({
     query,
     supabase
       .from("tournaments")
-      .select("prefecture, city")
-      .not("city", "is", null),
+      .select("prefecture, city"),
   ]);
 
   const { data, error, count } = tournamentResult;
@@ -369,6 +368,13 @@ export default async function TournamentsPage({
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
   const startItem = totalCount === 0 ? 0 : from + 1;
   const endItem = Math.min(from + tournaments.length, totalCount);
+
+  const prefectureTournamentCounts = (citiesResult.data ?? []).reduce<Record<string, number>>((counts, row) => {
+    const pref = row.prefecture?.trim();
+    if (!pref) return counts;
+    counts[pref] = (counts[pref] ?? 0) + 1;
+    return counts;
+  }, {});
 
   const citiesByPrefecture = (citiesResult.data ?? []).reduce<Record<string, string[]>>((map, row) => {
     const pref = row.prefecture?.trim();
@@ -435,6 +441,7 @@ export default async function TournamentsPage({
           cities={cities}
           citiesByPrefecture={citiesByPrefecture}
           prefectures={PREFECTURES}
+          prefectureTournamentCounts={prefectureTournamentCounts}
           submitPath={basePath}
           prefectureInPath={Boolean(routePrefecture)}
           title="検索条件を指定"
