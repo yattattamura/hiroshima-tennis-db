@@ -5,8 +5,6 @@ import { createClient } from "@/lib/supabase/client";
 
 const COOKIE_NAME = "htdb_favorites";
 const MAX_FAVORITES = 50;
-const supabase = createClient();
-
 function readFavorites(): string[] {
   if (typeof document === "undefined") return [];
 
@@ -57,6 +55,13 @@ export function FavoriteButton({
     let mounted = true;
 
     async function sync() {
+      if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) {
+        const cookieFavorites = readFavorites();
+        setIsFavorite(cookieFavorites.includes(tournamentId));
+        setIsReady(true);
+        return;
+      }
+      const supabase = createClient();
       const cookieFavorites = readFavorites();
       const {
         data: { user },
