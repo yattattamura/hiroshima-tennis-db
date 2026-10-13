@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { SITE_URL } from "@/lib/site";
 
 export function ForgotPasswordForm() {
   const [email, setEmail] = useState("");
@@ -28,7 +29,7 @@ export function ForgotPasswordForm() {
     const { error: resetError } =
       await supabase.auth.resetPasswordForEmail(trimmedEmail, {
         redirectTo:
-          window.location.origin +
+          SITE_URL +
           "/auth/callback?next=" +
           encodeURIComponent("/auth/update-password"),
       });
