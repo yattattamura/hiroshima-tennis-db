@@ -86,23 +86,25 @@ export function UserProfileSettings({
 
         <label>
           <span>市区町村</span>
-          <select
+          <input
+            type="text"
+            list="user-profile-city-options"
             value={city}
             disabled={!prefecture || saving}
+            autoComplete="off"
+            placeholder={prefecture ? "市区町村名を入力（例：大阪市）" : "先に都道府県を選択"}
             onChange={(event) => setCity(event.target.value)}
-          >
-            <option value="">指定しない</option>
+          />
+          <datalist id="user-profile-city-options">
             {cities.map((item) => (
-              <option key={item} value={item}>
-                {item}
-              </option>
+              <option key={item} value={item} />
             ))}
-          </select>
+          </datalist>
         </label>
       </div>
 
       <p className="user-profile-note">
-        都道府県・市区町村だけを登録します。番地などの住所は登録しません。
+        大会がまだ掲載されていない地域も登録できます。候補にない市区町村は直接入力してください。番地などの住所は登録しません。
       </p>
 
       <button
