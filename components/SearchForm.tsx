@@ -20,6 +20,7 @@ export function SearchForm({
   cities,
   citiesByPrefecture,
   prefectures,
+  prefectureTournamentCounts = {},
   submitPath = "/tournaments",
   prefectureInPath = false,
   initialValues = {},
@@ -30,6 +31,7 @@ export function SearchForm({
   cities: string[];
   citiesByPrefecture: Record<string, string[]>;
   prefectures: Array<{ name: string; slug: string }>;
+  prefectureTournamentCounts?: Record<string, number>;
   submitPath?: string;
   prefectureInPath?: boolean;
   initialValues?: SearchValues;
@@ -155,12 +157,30 @@ export function SearchForm({
             aria-label="都道府県"
           >
             <option value="">すべて</option>
-            {prefectures.map((prefecture) => (
-              <option key={prefecture.slug} value={prefecture.name}>
-                {prefecture.name}
-              </option>
-            ))}
+            {prefectures.map((prefecture) => {
+              const count = prefectureTournamentCounts[prefecture.name] ?? 0;
+              const label =
+                count > 0
+                  ? `${prefecture.name}（${count}大会）`
+                  : `${prefecture.name}（0大会・未掲載）`;
+
+              return (
+                <option key={prefecture.slug} value={prefecture.name}>
+                  {label}
+                </option>
+              );
+            })}
           </select>
+          {selectedPrefecture && (
+            <span
+              className={`prefecture-coverage-note ${(prefectureTournamentCounts[selectedPrefecture] ?? 0) > 0 ? "is-supported" : "is-unlisted"}`}
+              aria-live="polite"
+            >
+              {(prefectureTournamentCounts[selectedPrefecture] ?? 0) > 0
+                ? `この県の大会情報を掲載中（${prefectureTournamentCounts[selectedPrefecture]}大会）`
+                : "この県の大会情報はまだ掲載されていません"}
+            </span>
+          )}
         </label>
 
         <label className="quick-filter">
