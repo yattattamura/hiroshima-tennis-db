@@ -151,8 +151,7 @@ export default async function Home() {
       .limit(3),
     supabase
       .from("tournaments")
-      .select("prefecture, city")
-      .not("city", "is", null),
+      .select("prefecture, city"),
     supabase
       .from("tournaments")
       .select("id", {
@@ -206,6 +205,13 @@ export default async function Home() {
     convertTournament(row as SearchTournamentRow)
   );
 
+  const prefectureTournamentCounts = (citiesResult.data ?? []).reduce<Record<string, number>>((counts, row) => {
+    const prefecture = row.prefecture?.trim();
+    if (!prefecture) return counts;
+    counts[prefecture] = (counts[prefecture] ?? 0) + 1;
+    return counts;
+  }, {});
+
   const citiesByPrefecture = (citiesResult.data ?? []).reduce<Record<string, string[]>>((map, row) => {
     const prefecture = row.prefecture?.trim();
     const city = row.city?.trim();
@@ -243,6 +249,7 @@ export default async function Home() {
             cities={cities}
             citiesByPrefecture={citiesByPrefecture}
             prefectures={PREFECTURES}
+            prefectureTournamentCounts={prefectureTournamentCounts}
             submitPath="/"
             prefectureInPath
             initialValues={{
