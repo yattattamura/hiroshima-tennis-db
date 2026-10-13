@@ -171,7 +171,7 @@ export default async function TournamentsPage({
   let profilePrefecture = "";
   let profileCity = "";
 
-  if (!routePrefecture && (!params.prefecture || !params.city)) {
+  const areaNavigation = params.area === "1";\n\n  if (!areaNavigation && !routePrefecture && (!params.prefecture || !params.city)) {
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -459,7 +459,7 @@ export default async function TournamentsPage({
             level,
             gender,
             eligibility,
-            deadline: params.deadline ?? "open",
+            deadline: areaNavigation ? "all" : params.deadline ?? "open",
             status,
           }}
         />
