@@ -28,6 +28,7 @@ export function UserProfileSettings({
   async function saveProfile() {
     if (saving) return;
 
+    const supabase = createClient();
     setSaving(true);
     setMessage("");
 
