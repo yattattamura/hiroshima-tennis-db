@@ -16,7 +16,6 @@ export function UserProfileSettings({
   prefectures,
   citiesByPrefecture,
 }: UserProfileSettingsProps) {
-  const supabase = createClient();
   const [prefecture, setPrefecture] = useState(initialPrefecture);
   const [city, setCity] = useState(initialCity);
   const [saving, setSaving] = useState(false);
